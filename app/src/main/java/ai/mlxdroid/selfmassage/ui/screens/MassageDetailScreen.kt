@@ -28,18 +28,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.MassageStep
+import ai.mlxdroid.selfmassage.domain.GetTechniqueDetailUseCase
 import ai.mlxdroid.selfmassage.ui.components.MassageAnimationCanvas
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
+import ai.mlxdroid.selfmassage.ui.viewmodel.MassageDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MassageDetailScreen(
-    techniqueId: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: MassageDetailViewModel = viewModel(factory = MassageDetailViewModel.factory())
 ) {
-    val technique = MassageRepository.techniqueById(techniqueId) ?: return
+    val technique = viewModel.technique ?: return
     val scrollState = rememberScrollState()
 
     Scaffold(
@@ -62,7 +66,6 @@ fun MassageDetailScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Animation card
             ElevatedCard(modifier = Modifier.fillMaxWidth()) {
                 MassageAnimationCanvas(
                     animationType = technique.animationType,
@@ -70,17 +73,14 @@ fun MassageDetailScreen(
                 )
             }
 
-            // Summary
             Text(
                 technique.summary,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            // Steps header
             Text("Steps", style = MaterialTheme.typography.titleMedium)
 
-            // Step list
             technique.steps.forEach { step ->
                 StepRow(step = step)
             }
@@ -94,7 +94,6 @@ private fun StepRow(step: MassageStep) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Step number badge
         Surface(
             shape = CircleShape,
             color = MaterialTheme.colorScheme.primaryContainer,
@@ -123,7 +122,13 @@ private fun StepRow(step: MassageStep) {
 @Composable
 private fun MassageDetailScreenPreview() {
     SelfMassageTheme {
-        MassageDetailScreen(techniqueId = "neck_suboccipital", onBack = {})
+        MassageDetailScreen(
+            onBack = {},
+            viewModel = MassageDetailViewModel(
+                savedStateHandle = SavedStateHandle(mapOf("zoneId" to "neck", "techniqueId" to "neck_suboccipital")),
+                getTechniqueDetail = GetTechniqueDetailUseCase(MassageRepository)
+            )
+        )
     }
 }
 
@@ -131,7 +136,13 @@ private fun MassageDetailScreenPreview() {
 @Composable
 private fun MassageDetailCircularPreview() {
     SelfMassageTheme {
-        MassageDetailScreen(techniqueId = "neck_trapezius_knead", onBack = {})
+        MassageDetailScreen(
+            onBack = {},
+            viewModel = MassageDetailViewModel(
+                savedStateHandle = SavedStateHandle(mapOf("zoneId" to "neck", "techniqueId" to "neck_trapezius_knead")),
+                getTechniqueDetail = GetTechniqueDetailUseCase(MassageRepository)
+            )
+        )
     }
 }
 

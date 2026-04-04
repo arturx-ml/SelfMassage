@@ -26,24 +26,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
+import ai.mlxdroid.selfmassage.domain.GetTechniquesForZoneUseCase
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
+import ai.mlxdroid.selfmassage.ui.viewmodel.MassageListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MassageListScreen(
-    zoneId: String,
-    onTechniqueClick: (MassageTechnique) -> Unit,
-    onBack: () -> Unit
+    onTechniqueClick: (zoneId: String, techniqueId: String) -> Unit,
+    onBack: () -> Unit,
+    viewModel: MassageListViewModel = viewModel(factory = MassageListViewModel.factory())
 ) {
-    val zone = MassageRepository.zoneById(zoneId)
-    val techniques = MassageRepository.techniquesForZone(zoneId)
+    val state = viewModel.uiState
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(zone?.name ?: "") },
+                title = { Text(state.zone?.name ?: "") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
@@ -59,10 +62,10 @@ fun MassageListScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            items(techniques) { technique ->
+            items(state.techniques) { technique ->
                 TechniqueCard(
                     technique = technique,
-                    onClick = { onTechniqueClick(technique) }
+                    onClick = { onTechniqueClick(viewModel.zoneId, technique.id) }
                 )
             }
         }
@@ -112,7 +115,14 @@ private fun TechniqueCard(
 @Composable
 private fun MassageListScreenPreview() {
     SelfMassageTheme {
-        MassageListScreen(zoneId = "neck", onTechniqueClick = {}, onBack = {})
+        MassageListScreen(
+            onTechniqueClick = { _, _ -> },
+            onBack = {},
+            viewModel = MassageListViewModel(
+                savedStateHandle = SavedStateHandle(mapOf("zoneId" to "neck")),
+                getTechniquesForZone = GetTechniquesForZoneUseCase(MassageRepository)
+            )
+        )
     }
 }
 

@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import ai.mlxdroid.selfmassage.ui.screens.MassageDetailScreen
 import ai.mlxdroid.selfmassage.ui.screens.MassageListScreen
 import ai.mlxdroid.selfmassage.ui.screens.ZoneListScreen
@@ -20,25 +19,17 @@ fun AppNavGraph() {
             })
         }
 
-        composable<MassageList> { backStackEntry ->
-            val route: MassageList = backStackEntry.toRoute()
+        composable<MassageList> {
             MassageListScreen(
-                zoneId = route.zoneId,
-                onTechniqueClick = { technique ->
-                    navController.navigate(
-                        MassageDetail(zoneId = route.zoneId, techniqueId = technique.id)
-                    )
+                onTechniqueClick = { zoneId, techniqueId ->
+                    navController.navigate(MassageDetail(zoneId = zoneId, techniqueId = techniqueId))
                 },
                 onBack = { navController.popBackStack() }
             )
         }
 
-        composable<MassageDetail> { backStackEntry ->
-            val route: MassageDetail = backStackEntry.toRoute()
-            MassageDetailScreen(
-                techniqueId = route.techniqueId,
-                onBack = { navController.popBackStack() }
-            )
+        composable<MassageDetail> {
+            MassageDetailScreen(onBack = { navController.popBackStack() })
         }
     }
 }

@@ -29,13 +29,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import ai.mlxdroid.selfmassage.data.MassageRepository
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ai.mlxdroid.selfmassage.data.model.BodyZone
+import ai.mlxdroid.selfmassage.domain.GetZonesUseCase
+import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
+import ai.mlxdroid.selfmassage.ui.viewmodel.ZoneListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ZoneListScreen(onZoneClick: (BodyZone) -> Unit) {
+fun ZoneListScreen(
+    onZoneClick: (BodyZone) -> Unit,
+    viewModel: ZoneListViewModel = viewModel(factory = ZoneListViewModel.factory())
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -53,10 +59,10 @@ fun ZoneListScreen(onZoneClick: (BodyZone) -> Unit) {
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            items(MassageRepository.zones) { zone ->
+            items(viewModel.zones) { zone ->
                 ZoneCard(
                     zone = zone,
-                    techniqueCount = MassageRepository.techniquesForZone(zone.id).size,
+                    techniqueCount = zone.techniqueIds.size,
                     onClick = { onZoneClick(zone) },
                     modifier = Modifier.padding(vertical = 6.dp)
                 )
@@ -114,7 +120,10 @@ private fun zoneIcon(iconName: String): ImageVector = when (iconName) {
 @Composable
 private fun ZoneListScreenPreview() {
     SelfMassageTheme {
-        ZoneListScreen(onZoneClick = {})
+        ZoneListScreen(
+            onZoneClick = {},
+            viewModel = ZoneListViewModel(GetZonesUseCase(MassageRepository))
+        )
     }
 }
 

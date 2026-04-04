@@ -5,7 +5,7 @@ import ai.mlxdroid.selfmassage.data.model.BodyZone
 import ai.mlxdroid.selfmassage.data.model.MassageStep
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 
-object MassageRepository {
+object MassageRepository : MassageRepositoryInterface {
 
     val techniques: List<MassageTechnique> = listOf(
         // --- NECK ---
