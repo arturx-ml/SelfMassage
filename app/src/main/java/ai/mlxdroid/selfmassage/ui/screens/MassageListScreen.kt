@@ -1,5 +1,6 @@
 package ai.mlxdroid.selfmassage.ui.screens
 
+import ai.mlxdroid.selfmassage.data.MassageRepository
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,8 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import ai.mlxdroid.selfmassage.data.MassageRepository
+import androidx.hilt.navigation.compose.hiltViewModel
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
 import ai.mlxdroid.selfmassage.ui.viewmodel.MassageListViewModel
@@ -36,7 +36,7 @@ import ai.mlxdroid.selfmassage.ui.viewmodel.MassageListViewModel
 fun MassageListScreen(
     onTechniqueClick: (zoneId: String, techniqueId: String) -> Unit,
     onBack: () -> Unit,
-    viewModel: MassageListViewModel = viewModel(factory = MassageListViewModel.factory())
+    viewModel: MassageListViewModel = hiltViewModel()
 ) {
     val state = viewModel.uiState
     MassageListContent(

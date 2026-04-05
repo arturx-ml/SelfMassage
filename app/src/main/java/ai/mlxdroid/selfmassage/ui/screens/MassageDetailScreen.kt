@@ -28,7 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.AnimationType
 import ai.mlxdroid.selfmassage.data.model.MassageStep
@@ -40,7 +40,7 @@ import ai.mlxdroid.selfmassage.ui.viewmodel.MassageDetailViewModel
 @Composable
 fun MassageDetailScreen(
     onBack: () -> Unit,
-    viewModel: MassageDetailViewModel = viewModel(factory = MassageDetailViewModel.factory())
+    viewModel: MassageDetailViewModel = hiltViewModel()
 ) {
     val technique = viewModel.technique ?: return
     MassageDetailContent(technique = technique, onBack = onBack)
