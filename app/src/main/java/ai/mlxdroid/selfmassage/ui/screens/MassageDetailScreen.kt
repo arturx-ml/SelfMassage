@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -13,7 +15,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -40,17 +44,19 @@ import ai.mlxdroid.selfmassage.ui.viewmodel.MassageDetailViewModel
 @Composable
 fun MassageDetailScreen(
     onBack: () -> Unit,
+    onStartSession: (techniqueId: String) -> Unit = {},
     viewModel: MassageDetailViewModel = hiltViewModel()
 ) {
     val technique = viewModel.technique ?: return
-    MassageDetailContent(technique = technique, onBack = onBack)
+    MassageDetailContent(technique = technique, onBack = onBack, onStartSession = onStartSession)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MassageDetailContent(
     technique: MassageTechnique,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onStartSession: (techniqueId: String) -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
 
@@ -61,6 +67,11 @@ fun MassageDetailContent(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { onStartSession(technique.id) }) {
+                        Icon(Icons.Outlined.PlayCircle, contentDescription = "Start session")
                     }
                 }
             )
@@ -91,6 +102,15 @@ fun MassageDetailContent(
             Text("Steps", style = MaterialTheme.typography.titleMedium)
 
             technique.steps.forEach { step -> StepRow(step = step) }
+
+            Spacer(Modifier.height(8.dp))
+
+            Button(
+                onClick = { onStartSession(technique.id) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Start Session")
+            }
         }
     }
 }

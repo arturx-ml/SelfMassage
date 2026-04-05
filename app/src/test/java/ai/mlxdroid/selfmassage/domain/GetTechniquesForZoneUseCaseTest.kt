@@ -61,3 +61,4 @@ class GetTechniquesForZoneUseCaseTest {
         assertEquals("shoulder_deltoid_strip", techniques[2].id)
     }
 }
+

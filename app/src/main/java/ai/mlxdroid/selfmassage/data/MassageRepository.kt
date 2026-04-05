@@ -5,6 +5,7 @@ import ai.mlxdroid.selfmassage.data.model.BodyLocation
 import ai.mlxdroid.selfmassage.data.model.BodyZone
 import ai.mlxdroid.selfmassage.data.model.MassageStep
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
+import ai.mlxdroid.selfmassage.data.model.Routine
 
 object MassageRepository : MassageRepositoryInterface {
 
@@ -132,6 +133,33 @@ object MassageRepository : MassageRepositoryInterface {
         )
     )
 
+    override val routines: List<Routine> = listOf(
+        Routine(
+            id = "morning_neck_reset",
+            name = "Morning Neck Reset",
+            description = "A gentle wake-up sequence targeting the base of the skull and neck-shoulder junction to ease overnight stiffness.",
+            iconName = "SelfImprovement",
+            durationMinutes = 6,
+            techniqueIds = listOf("neck_suboccipital", "neck_trapezius_knead")
+        ),
+        Routine(
+            id = "office_tension_relief",
+            name = "Office Tension Relief",
+            description = "Targets the common desk-work tension triangle: side of neck, shoulder joint, and shoulder blade edges.",
+            iconName = "FitnessCenter",
+            durationMinutes = 11,
+            techniqueIds = listOf("neck_lateral_flex", "shoulder_cross_friction", "shoulder_blade_squeeze")
+        ),
+        Routine(
+            id = "arms_recovery",
+            name = "Arms & Hands Recovery",
+            description = "Flushes forearm fatigue and relieves hand tension — ideal after typing, sport, or manual work.",
+            iconName = "Straighten",
+            durationMinutes = 7,
+            techniqueIds = listOf("arm_forearm_roll", "arm_hand_web_press")
+        )
+    )
+
     override val zones: List<BodyZone> = listOf(
         BodyZone(
             id = "neck",
@@ -161,4 +189,6 @@ object MassageRepository : MassageRepositoryInterface {
         val zone = zoneById(zoneId) ?: return emptyList()
         return zone.techniqueIds.mapNotNull { techniqueById(it) }
     }
+
+    override fun routineById(id: String): Routine? = routines.find { it.id == id }
 }
