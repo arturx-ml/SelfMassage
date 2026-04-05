@@ -26,15 +26,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
-import ai.mlxdroid.selfmassage.domain.GetTechniquesForZoneUseCase
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
 import ai.mlxdroid.selfmassage.ui.viewmodel.MassageListViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MassageListScreen(
     onTechniqueClick: (zoneId: String, techniqueId: String) -> Unit,
@@ -42,11 +39,26 @@ fun MassageListScreen(
     viewModel: MassageListViewModel = viewModel(factory = MassageListViewModel.factory())
 ) {
     val state = viewModel.uiState
+    MassageListContent(
+        zoneName = state.zone?.name ?: "",
+        techniques = state.techniques,
+        onTechniqueClick = { techniqueId -> onTechniqueClick(viewModel.zoneId, techniqueId) },
+        onBack = onBack
+    )
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MassageListContent(
+    zoneName: String,
+    techniques: List<MassageTechnique>,
+    onTechniqueClick: (techniqueId: String) -> Unit,
+    onBack: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(state.zone?.name ?: "") },
+                title = { Text(zoneName) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
@@ -62,10 +74,10 @@ fun MassageListScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            items(state.techniques) { technique ->
+            items(techniques) { technique ->
                 TechniqueCard(
                     technique = technique,
-                    onClick = { onTechniqueClick(viewModel.zoneId, technique.id) }
+                    onClick = { onTechniqueClick(technique.id) }
                 )
             }
         }
@@ -73,10 +85,7 @@ fun MassageListScreen(
 }
 
 @Composable
-private fun TechniqueCard(
-    technique: MassageTechnique,
-    onClick: () -> Unit
-) {
+private fun TechniqueCard(technique: MassageTechnique, onClick: () -> Unit) {
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -111,17 +120,28 @@ private fun TechniqueCard(
     }
 }
 
-@Preview(showBackground = true, name = "Massage List Screen – Neck")
+@Preview(showBackground = true, name = "Massage List – Neck")
 @Composable
-private fun MassageListScreenPreview() {
+private fun MassageListContentPreview() {
     SelfMassageTheme {
-        MassageListScreen(
-            onTechniqueClick = { _, _ -> },
-            onBack = {},
-            viewModel = MassageListViewModel(
-                savedStateHandle = SavedStateHandle(mapOf("zoneId" to "neck")),
-                getTechniquesForZone = GetTechniquesForZoneUseCase(MassageRepository)
-            )
+        MassageListContent(
+            zoneName = "Neck",
+            techniques = MassageRepository.techniquesForZone("neck"),
+            onTechniqueClick = {},
+            onBack = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Massage List – Empty")
+@Composable
+private fun MassageListContentEmptyPreview() {
+    SelfMassageTheme {
+        MassageListContent(
+            zoneName = "Unknown",
+            techniques = emptyList(),
+            onTechniqueClick = {},
+            onBack = {}
         )
     }
 }
@@ -130,9 +150,6 @@ private fun MassageListScreenPreview() {
 @Composable
 private fun TechniqueCardPreview() {
     SelfMassageTheme {
-        TechniqueCard(
-            technique = MassageRepository.techniques.first(),
-            onClick = {}
-        )
+        TechniqueCard(technique = MassageRepository.techniques.first(), onClick = {})
     }
 }

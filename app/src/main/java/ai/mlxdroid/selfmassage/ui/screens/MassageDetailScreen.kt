@@ -28,22 +28,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ai.mlxdroid.selfmassage.data.MassageRepository
+import ai.mlxdroid.selfmassage.data.model.AnimationType
 import ai.mlxdroid.selfmassage.data.model.MassageStep
-import ai.mlxdroid.selfmassage.domain.GetTechniqueDetailUseCase
+import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 import ai.mlxdroid.selfmassage.ui.components.MassageAnimationCanvas
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
 import ai.mlxdroid.selfmassage.ui.viewmodel.MassageDetailViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MassageDetailScreen(
     onBack: () -> Unit,
     viewModel: MassageDetailViewModel = viewModel(factory = MassageDetailViewModel.factory())
 ) {
     val technique = viewModel.technique ?: return
+    MassageDetailContent(technique = technique, onBack = onBack)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MassageDetailContent(
+    technique: MassageTechnique,
+    onBack: () -> Unit
+) {
     val scrollState = rememberScrollState()
 
     Scaffold(
@@ -81,9 +89,7 @@ fun MassageDetailScreen(
 
             Text("Steps", style = MaterialTheme.typography.titleMedium)
 
-            technique.steps.forEach { step ->
-                StepRow(step = step)
-            }
+            technique.steps.forEach { step -> StepRow(step = step) }
         }
     }
 }
@@ -110,24 +116,18 @@ private fun StepRow(step: MassageStep) {
 
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(step.instruction, style = MaterialTheme.typography.bodyLarge)
-            AssistChip(
-                onClick = {},
-                label = { Text("${step.durationSeconds}s") }
-            )
+            AssistChip(onClick = {}, label = { Text("${step.durationSeconds}s") })
         }
     }
 }
 
 @Preview(showBackground = true, name = "Massage Detail – Suboccipital Release")
 @Composable
-private fun MassageDetailScreenPreview() {
+private fun MassageDetailContentPreview() {
     SelfMassageTheme {
-        MassageDetailScreen(
-            onBack = {},
-            viewModel = MassageDetailViewModel(
-                savedStateHandle = SavedStateHandle(mapOf("zoneId" to "neck", "techniqueId" to "neck_suboccipital")),
-                getTechniqueDetail = GetTechniqueDetailUseCase(MassageRepository)
-            )
+        MassageDetailContent(
+            technique = MassageRepository.techniqueById("neck_suboccipital")!!,
+            onBack = {}
         )
     }
 }
@@ -136,12 +136,20 @@ private fun MassageDetailScreenPreview() {
 @Composable
 private fun MassageDetailCircularPreview() {
     SelfMassageTheme {
-        MassageDetailScreen(
-            onBack = {},
-            viewModel = MassageDetailViewModel(
-                savedStateHandle = SavedStateHandle(mapOf("zoneId" to "neck", "techniqueId" to "neck_trapezius_knead")),
-                getTechniqueDetail = GetTechniqueDetailUseCase(MassageRepository)
-            )
+        MassageDetailContent(
+            technique = MassageRepository.techniqueById("neck_trapezius_knead")!!,
+            onBack = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Massage Detail – Horizontal Sweep")
+@Composable
+private fun MassageDetailSweepPreview() {
+    SelfMassageTheme {
+        MassageDetailContent(
+            technique = MassageRepository.techniqueById("shoulder_cross_friction")!!,
+            onBack = {}
         )
     }
 }

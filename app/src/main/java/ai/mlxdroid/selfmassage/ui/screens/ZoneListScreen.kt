@@ -30,17 +30,24 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import ai.mlxdroid.selfmassage.data.model.BodyZone
-import ai.mlxdroid.selfmassage.domain.GetZonesUseCase
 import ai.mlxdroid.selfmassage.data.MassageRepository
+import ai.mlxdroid.selfmassage.data.model.BodyZone
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
 import ai.mlxdroid.selfmassage.ui.viewmodel.ZoneListViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZoneListScreen(
     onZoneClick: (BodyZone) -> Unit,
     viewModel: ZoneListViewModel = viewModel(factory = ZoneListViewModel.factory())
+) {
+    ZoneListContent(zones = viewModel.zones, onZoneClick = onZoneClick)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ZoneListContent(
+    zones: List<BodyZone>,
+    onZoneClick: (BodyZone) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -59,7 +66,7 @@ fun ZoneListScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            items(viewModel.zones) { zone ->
+            items(zones) { zone ->
                 ZoneCard(
                     zone = zone,
                     techniqueCount = zone.techniqueIds.size,
@@ -78,9 +85,7 @@ private fun ZoneCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    ElevatedCard(
-        modifier = modifier.clickable(onClick = onClick)
-    ) {
+    ElevatedCard(modifier = modifier.clickable(onClick = onClick)) {
         ListItem(
             headlineContent = { Text(zone.name, style = MaterialTheme.typography.titleMedium) },
             supportingContent = { Text("$techniqueCount techniques") },
@@ -118,12 +123,9 @@ private fun zoneIcon(iconName: String): ImageVector = when (iconName) {
 
 @Preview(showBackground = true, name = "Zone List Screen")
 @Composable
-private fun ZoneListScreenPreview() {
+private fun ZoneListContentPreview() {
     SelfMassageTheme {
-        ZoneListScreen(
-            onZoneClick = {},
-            viewModel = ZoneListViewModel(GetZonesUseCase(MassageRepository))
-        )
+        ZoneListContent(zones = MassageRepository.zones, onZoneClick = {})
     }
 }
 
