@@ -7,7 +7,7 @@ import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 
 object MassageRepository : MassageRepositoryInterface {
 
-    val techniques: List<MassageTechnique> = listOf(
+    override val techniques: List<MassageTechnique> = listOf(
         // --- NECK ---
         MassageTechnique(
             id = "neck_suboccipital",
@@ -123,7 +123,7 @@ object MassageRepository : MassageRepositoryInterface {
         )
     )
 
-    val zones: List<BodyZone> = listOf(
+    override val zones: List<BodyZone> = listOf(
         BodyZone(
             id = "neck",
             name = "Neck",
@@ -144,11 +144,11 @@ object MassageRepository : MassageRepositoryInterface {
         )
     )
 
-    fun zoneById(id: String): BodyZone? = zones.find { it.id == id }
+    override fun zoneById(id: String): BodyZone? = zones.find { it.id == id }
 
-    fun techniqueById(id: String): MassageTechnique? = techniques.find { it.id == id }
+    override fun techniqueById(id: String): MassageTechnique? = techniques.find { it.id == id }
 
-    fun techniquesForZone(zoneId: String): List<MassageTechnique> {
+    override fun techniquesForZone(zoneId: String): List<MassageTechnique> {
         val zone = zoneById(zoneId) ?: return emptyList()
         return zone.techniqueIds.mapNotNull { techniqueById(it) }
     }
