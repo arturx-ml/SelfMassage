@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ai.mlxdroid.selfmassage.data.model.AnimationType
+import ai.mlxdroid.selfmassage.data.model.BodyLocation
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
 import kotlin.math.PI
 import kotlin.math.abs
@@ -40,6 +41,7 @@ import kotlin.math.sin
 @Composable
 fun MassageAnimationCanvas(
     animationType: AnimationType,
+    bodyLocation: BodyLocation,
     modifier: Modifier = Modifier
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "massage_anim")
@@ -81,6 +83,7 @@ fun MassageAnimationCanvas(
             AnimationType.PRESSURE_PULSE ->
                 drawTriggerPointPulse(progress, error, errorContainer, surfaceVariant, onSurface)
         }
+        drawBodyLocator(progress, bodyLocation, surfaceVariant, primary, onPrimaryContainer)
     }
 }
 
@@ -517,6 +520,249 @@ private fun DrawScope.drawTriggerPointPulse(
     }
 }
 
+// ─── Body location locator panel (top-left corner) ───────────────────────────
+
+private fun DrawScope.drawBodyLocator(
+    progress: Float,
+    bodyLocation: BodyLocation,
+    bgColor: Color,
+    spotColor: Color,
+    outlineColor: Color
+) {
+    val pad = 10.dp.toPx()
+    val panelW = 64.dp.toPx()
+    val panelH = 88.dp.toPx()
+    val left = pad
+    val top = pad
+
+    // Panel background
+    drawRoundRect(
+        color = bgColor.copy(alpha = 0.75f),
+        topLeft = Offset(left, top),
+        size = Size(panelW, panelH),
+        cornerRadius = CornerRadius(8.dp.toPx())
+    )
+    drawRoundRect(
+        color = outlineColor.copy(alpha = 0.3f),
+        topLeft = Offset(left, top),
+        size = Size(panelW, panelH),
+        cornerRadius = CornerRadius(8.dp.toPx()),
+        style = Stroke(width = 1.dp.toPx())
+    )
+
+    val cx = left + panelW / 2f
+    val pulse = 0.5f + 0.5f * sin(progress * 2f * PI.toFloat())
+
+    when (bodyLocation) {
+        BodyLocation.BASE_OF_SKULL,
+        BodyLocation.LATERAL_NECK,
+        BodyLocation.UPPER_TRAPEZIUS -> drawHeadNeckLocator(
+            bodyLocation, cx, top, panelH, outlineColor, spotColor, pulse
+        )
+
+        BodyLocation.SHOULDER_BLADE,
+        BodyLocation.UPPER_SHOULDER,
+        BodyLocation.OUTER_SHOULDER -> drawShoulderLocator(
+            bodyLocation, cx, top, panelH, outlineColor, spotColor, pulse
+        )
+
+        BodyLocation.FOREARM,
+        BodyLocation.HAND_WEB -> drawArmLocator(
+            bodyLocation, cx, top, panelH, outlineColor, spotColor, pulse
+        )
+    }
+}
+
+private fun DrawScope.drawHeadNeckLocator(
+    location: BodyLocation,
+    cx: Float, panelTop: Float, panelH: Float,
+    outlineColor: Color, spotColor: Color, pulse: Float
+) {
+    val headRx = 11.dp.toPx()
+    val headRy = 13.dp.toPx()
+    val headCy = panelTop + 22.dp.toPx()
+    val neckTop = headCy + headRy - 2.dp.toPx()
+    val neckBottom = neckTop + 18.dp.toPx()
+    val neckHalfW = 6.dp.toPx()
+    val shoulderY = neckBottom + 2.dp.toPx()
+    val shoulderSpread = 20.dp.toPx()
+
+    // Head
+    drawOval(
+        color = outlineColor.copy(alpha = 0.15f),
+        topLeft = Offset(cx - headRx, headCy - headRy),
+        size = Size(headRx * 2, headRy * 2)
+    )
+    drawOval(
+        color = outlineColor.copy(alpha = 0.55f),
+        topLeft = Offset(cx - headRx, headCy - headRy),
+        size = Size(headRx * 2, headRy * 2),
+        style = Stroke(width = 1.5.dp.toPx())
+    )
+    // Neck
+    drawRect(
+        color = outlineColor.copy(alpha = 0.15f),
+        topLeft = Offset(cx - neckHalfW, neckTop),
+        size = Size(neckHalfW * 2, neckBottom - neckTop)
+    )
+    drawRect(
+        color = outlineColor.copy(alpha = 0.55f),
+        topLeft = Offset(cx - neckHalfW, neckTop),
+        size = Size(neckHalfW * 2, neckBottom - neckTop),
+        style = Stroke(width = 1.5.dp.toPx())
+    )
+    // Shoulder lines
+    drawLine(
+        color = outlineColor.copy(alpha = 0.55f),
+        start = Offset(cx - neckHalfW, shoulderY),
+        end = Offset(cx - shoulderSpread, shoulderY + 6.dp.toPx()),
+        strokeWidth = 1.5.dp.toPx(),
+        cap = StrokeCap.Round
+    )
+    drawLine(
+        color = outlineColor.copy(alpha = 0.55f),
+        start = Offset(cx + neckHalfW, shoulderY),
+        end = Offset(cx + shoulderSpread, shoulderY + 6.dp.toPx()),
+        strokeWidth = 1.5.dp.toPx(),
+        cap = StrokeCap.Round
+    )
+
+    // Target spot
+    val spotOffset = when (location) {
+        BodyLocation.BASE_OF_SKULL -> Offset(cx, neckTop)
+        BodyLocation.LATERAL_NECK -> Offset(cx + neckHalfW + 3.dp.toPx(), (neckTop + neckBottom) / 2f)
+        else -> Offset(cx + shoulderSpread * 0.55f, shoulderY + 4.dp.toPx()) // UPPER_TRAPEZIUS
+    }
+    drawCircle(color = spotColor.copy(alpha = 0.25f + 0.25f * pulse), radius = 7.dp.toPx(), center = spotOffset)
+    drawCircle(color = spotColor, radius = 3.5.dp.toPx(), center = spotOffset)
+}
+
+private fun DrawScope.drawShoulderLocator(
+    location: BodyLocation,
+    cx: Float, panelTop: Float, panelH: Float,
+    outlineColor: Color, spotColor: Color, pulse: Float
+) {
+    val neckTop = panelTop + 14.dp.toPx()
+    val neckHalfW = 5.dp.toPx()
+    val neckH = 10.dp.toPx()
+    val shoulderY = neckTop + neckH
+    val shoulderSpread = 22.dp.toPx()
+    val torsoBottom = panelTop + panelH - 14.dp.toPx()
+
+    // Neck stub
+    drawRect(
+        color = outlineColor.copy(alpha = 0.15f),
+        topLeft = Offset(cx - neckHalfW, neckTop),
+        size = Size(neckHalfW * 2, neckH)
+    )
+    drawRect(
+        color = outlineColor.copy(alpha = 0.55f),
+        topLeft = Offset(cx - neckHalfW, neckTop),
+        size = Size(neckHalfW * 2, neckH),
+        style = Stroke(width = 1.5.dp.toPx())
+    )
+    // Shoulder lines
+    val leftShoulderEnd = Offset(cx - shoulderSpread, shoulderY + 4.dp.toPx())
+    val rightShoulderEnd = Offset(cx + shoulderSpread, shoulderY + 4.dp.toPx())
+    drawLine(
+        color = outlineColor.copy(alpha = 0.55f),
+        start = Offset(cx - neckHalfW, shoulderY),
+        end = leftShoulderEnd,
+        strokeWidth = 1.5.dp.toPx(), cap = StrokeCap.Round
+    )
+    drawLine(
+        color = outlineColor.copy(alpha = 0.55f),
+        start = Offset(cx + neckHalfW, shoulderY),
+        end = rightShoulderEnd,
+        strokeWidth = 1.5.dp.toPx(), cap = StrokeCap.Round
+    )
+    // Torso outline (curved upper back)
+    val torsoPath = Path().apply {
+        moveTo(leftShoulderEnd.x, leftShoulderEnd.y)
+        cubicTo(
+            leftShoulderEnd.x, leftShoulderEnd.y + 10.dp.toPx(),
+            cx - 14.dp.toPx(), torsoBottom - 8.dp.toPx(),
+            cx - 12.dp.toPx(), torsoBottom
+        )
+        lineTo(cx + 12.dp.toPx(), torsoBottom)
+        cubicTo(
+            cx + 14.dp.toPx(), torsoBottom - 8.dp.toPx(),
+            rightShoulderEnd.x, rightShoulderEnd.y + 10.dp.toPx(),
+            rightShoulderEnd.x, rightShoulderEnd.y
+        )
+    }
+    drawPath(torsoPath, color = outlineColor.copy(alpha = 0.12f))
+    drawPath(torsoPath, color = outlineColor.copy(alpha = 0.55f), style = Stroke(width = 1.5.dp.toPx(), join = StrokeJoin.Round))
+
+    // Target spot
+    val spotOffset = when (location) {
+        BodyLocation.SHOULDER_BLADE -> Offset(cx + 8.dp.toPx(), shoulderY + 18.dp.toPx())
+        BodyLocation.UPPER_SHOULDER -> rightShoulderEnd
+        else -> Offset(cx + shoulderSpread + 2.dp.toPx(), rightShoulderEnd.y + 2.dp.toPx()) // OUTER_SHOULDER
+    }
+    drawCircle(color = spotColor.copy(alpha = 0.25f + 0.25f * pulse), radius = 7.dp.toPx(), center = spotOffset)
+    drawCircle(color = spotColor, radius = 3.5.dp.toPx(), center = spotOffset)
+}
+
+private fun DrawScope.drawArmLocator(
+    location: BodyLocation,
+    cx: Float, panelTop: Float, panelH: Float,
+    outlineColor: Color, spotColor: Color, pulse: Float
+) {
+    val armHalfW = 9.dp.toPx()
+    val armTop = panelTop + 10.dp.toPx()
+    val handTop = panelTop + panelH - 30.dp.toPx()
+    val armBottom = handTop
+
+    // Forearm rounded rect
+    drawRoundRect(
+        color = outlineColor.copy(alpha = 0.15f),
+        topLeft = Offset(cx - armHalfW, armTop),
+        size = Size(armHalfW * 2, armBottom - armTop),
+        cornerRadius = CornerRadius(armHalfW)
+    )
+    drawRoundRect(
+        color = outlineColor.copy(alpha = 0.55f),
+        topLeft = Offset(cx - armHalfW, armTop),
+        size = Size(armHalfW * 2, armBottom - armTop),
+        cornerRadius = CornerRadius(armHalfW),
+        style = Stroke(width = 1.5.dp.toPx())
+    )
+    // Hand oval
+    val handRx = 11.dp.toPx()
+    val handRy = 8.dp.toPx()
+    val handCy = handTop + handRy
+    drawOval(
+        color = outlineColor.copy(alpha = 0.15f),
+        topLeft = Offset(cx - handRx, handCy - handRy),
+        size = Size(handRx * 2, handRy * 2)
+    )
+    drawOval(
+        color = outlineColor.copy(alpha = 0.55f),
+        topLeft = Offset(cx - handRx, handCy - handRy),
+        size = Size(handRx * 2, handRy * 2),
+        style = Stroke(width = 1.5.dp.toPx())
+    )
+    // Finger stubs
+    for (i in -1..1) {
+        val fx = cx + i * 5.dp.toPx()
+        drawLine(
+            color = outlineColor.copy(alpha = 0.4f),
+            start = Offset(fx, armTop),
+            end = Offset(fx, armTop - 5.dp.toPx()),
+            strokeWidth = 2.5.dp.toPx(), cap = StrokeCap.Round
+        )
+    }
+
+    // Target spot
+    val spotOffset = when (location) {
+        BodyLocation.FOREARM -> Offset(cx, (armTop + armBottom) / 2f)
+        else -> Offset(cx + 5.dp.toPx(), handCy) // HAND_WEB
+    }
+    drawCircle(color = spotColor.copy(alpha = 0.25f + 0.25f * pulse), radius = 7.dp.toPx(), center = spotOffset)
+    drawCircle(color = spotColor, radius = 3.5.dp.toPx(), center = spotOffset)
+}
+
 // ─── Helper: draw a centered text label ──────────────────────────────────────
 
 private fun DrawScope.drawLabel(text: String, x: Float, y: Float, color: Color) {
@@ -535,26 +781,90 @@ private fun DrawScope.drawLabel(text: String, x: Float, y: Float, color: Color) 
 
 // ─── Previews ────────────────────────────────────────────────────────────────
 
-@Preview(showBackground = true, name = "Animation – Circular (Kneading)")
+@Preview(showBackground = true, name = "Animation – Circular (Upper Trapezius)")
 @Composable
 private fun PreviewCircular() {
-    SelfMassageTheme { MassageAnimationCanvas(animationType = AnimationType.CIRCULAR) }
+    SelfMassageTheme {
+        MassageAnimationCanvas(
+            animationType = AnimationType.CIRCULAR,
+            bodyLocation = BodyLocation.UPPER_TRAPEZIUS
+        )
+    }
 }
 
-@Preview(showBackground = true, name = "Animation – Horizontal Sweep (Cross-Fiber)")
+@Preview(showBackground = true, name = "Animation – Circular (Shoulder Blade)")
+@Composable
+private fun PreviewCircularShoulderBlade() {
+    SelfMassageTheme {
+        MassageAnimationCanvas(
+            animationType = AnimationType.CIRCULAR,
+            bodyLocation = BodyLocation.SHOULDER_BLADE
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Animation – Horizontal Sweep (Shoulder)")
 @Composable
 private fun PreviewHorizontalSweep() {
-    SelfMassageTheme { MassageAnimationCanvas(animationType = AnimationType.HORIZONTAL_SWEEP) }
+    SelfMassageTheme {
+        MassageAnimationCanvas(
+            animationType = AnimationType.HORIZONTAL_SWEEP,
+            bodyLocation = BodyLocation.UPPER_SHOULDER
+        )
+    }
 }
 
-@Preview(showBackground = true, name = "Animation – Vertical Stroke (Effleurage)")
+@Preview(showBackground = true, name = "Animation – Horizontal Sweep (Forearm)")
+@Composable
+private fun PreviewHorizontalSweepForearm() {
+    SelfMassageTheme {
+        MassageAnimationCanvas(
+            animationType = AnimationType.HORIZONTAL_SWEEP,
+            bodyLocation = BodyLocation.FOREARM
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Animation – Vertical Stroke (Lateral Neck)")
 @Composable
 private fun PreviewVerticalStroke() {
-    SelfMassageTheme { MassageAnimationCanvas(animationType = AnimationType.VERTICAL_STROKE) }
+    SelfMassageTheme {
+        MassageAnimationCanvas(
+            animationType = AnimationType.VERTICAL_STROKE,
+            bodyLocation = BodyLocation.LATERAL_NECK
+        )
+    }
 }
 
-@Preview(showBackground = true, name = "Animation – Pressure Pulse (Trigger Point)")
+@Preview(showBackground = true, name = "Animation – Vertical Stroke (Outer Shoulder)")
+@Composable
+private fun PreviewVerticalStrokeOuter() {
+    SelfMassageTheme {
+        MassageAnimationCanvas(
+            animationType = AnimationType.VERTICAL_STROKE,
+            bodyLocation = BodyLocation.OUTER_SHOULDER
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Animation – Pressure Pulse (Base of Skull)")
 @Composable
 private fun PreviewPressurePulse() {
-    SelfMassageTheme { MassageAnimationCanvas(animationType = AnimationType.PRESSURE_PULSE) }
+    SelfMassageTheme {
+        MassageAnimationCanvas(
+            animationType = AnimationType.PRESSURE_PULSE,
+            bodyLocation = BodyLocation.BASE_OF_SKULL
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Animation – Pressure Pulse (Hand Web)")
+@Composable
+private fun PreviewPressurePulseHand() {
+    SelfMassageTheme {
+        MassageAnimationCanvas(
+            animationType = AnimationType.PRESSURE_PULSE,
+            bodyLocation = BodyLocation.HAND_WEB
+        )
+    }
 }

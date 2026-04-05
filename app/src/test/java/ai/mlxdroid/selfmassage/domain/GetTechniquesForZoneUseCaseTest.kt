@@ -2,6 +2,7 @@ package ai.mlxdroid.selfmassage.domain
 
 import ai.mlxdroid.selfmassage.FakeMassageRepository
 import ai.mlxdroid.selfmassage.data.model.AnimationType
+import ai.mlxdroid.selfmassage.data.model.BodyLocation
 import ai.mlxdroid.selfmassage.data.model.BodyZone
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 import org.junit.Assert.assertEquals
@@ -18,7 +19,8 @@ class GetTechniquesForZoneUseCaseTest {
         summary = "Releases tension at the base of the skull",
         durationMinutes = 3,
         steps = emptyList(),
-        animationType = AnimationType.PRESSURE_PULSE
+        animationType = AnimationType.PRESSURE_PULSE,
+        bodyLocation = BodyLocation.BASE_OF_SKULL
     )
 
     @Test

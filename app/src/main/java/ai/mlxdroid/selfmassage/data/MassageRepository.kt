@@ -1,6 +1,7 @@
 package ai.mlxdroid.selfmassage.data
 
 import ai.mlxdroid.selfmassage.data.model.AnimationType
+import ai.mlxdroid.selfmassage.data.model.BodyLocation
 import ai.mlxdroid.selfmassage.data.model.BodyZone
 import ai.mlxdroid.selfmassage.data.model.MassageStep
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
@@ -15,6 +16,7 @@ object MassageRepository : MassageRepositoryInterface {
             summary = "Releases tension at the base of the skull",
             durationMinutes = 3,
             animationType = AnimationType.PRESSURE_PULSE,
+            bodyLocation = BodyLocation.BASE_OF_SKULL,
             steps = listOf(
                 MassageStep(1, "Sit upright in a chair. Place your fingertips at the base of your skull where it meets the neck.", 30),
                 MassageStep(2, "Apply gentle upward pressure with both middle fingers into the two small hollows on either side of the spine.", 30),
@@ -28,6 +30,7 @@ object MassageRepository : MassageRepositoryInterface {
             summary = "Targets sternocleidomastoid and scalene muscles",
             durationMinutes = 4,
             animationType = AnimationType.VERTICAL_STROKE,
+            bodyLocation = BodyLocation.LATERAL_NECK,
             steps = listOf(
                 MassageStep(1, "Drop your right ear toward your right shoulder until you feel a stretch on the left side of your neck.", 20),
                 MassageStep(2, "Use your left hand's fingertips to apply short downward strokes along the left side of your neck from just behind the ear to the collarbone.", 45),
@@ -41,6 +44,7 @@ object MassageRepository : MassageRepositoryInterface {
             summary = "Classic knead for the neck-shoulder junction",
             durationMinutes = 5,
             animationType = AnimationType.CIRCULAR,
+            bodyLocation = BodyLocation.UPPER_TRAPEZIUS,
             steps = listOf(
                 MassageStep(1, "Reach your right hand across to your left shoulder-neck junction (the ridge of the trapezius).", 10),
                 MassageStep(2, "Grasp the muscle belly between your fingers and thumb and squeeze firmly without digging in.", 20),
@@ -57,6 +61,7 @@ object MassageRepository : MassageRepositoryInterface {
             summary = "Breaks up adhesions in the rotator cuff area",
             durationMinutes = 4,
             animationType = AnimationType.HORIZONTAL_SWEEP,
+            bodyLocation = BodyLocation.UPPER_SHOULDER,
             steps = listOf(
                 MassageStep(1, "Using the opposite hand, locate the front edge of the shoulder (anterior deltoid).", 15),
                 MassageStep(2, "Place 2–3 fingers across the muscle fibers — perpendicular to how they run.", 10),
@@ -70,6 +75,7 @@ object MassageRepository : MassageRepositoryInterface {
             summary = "Relieves tension around the shoulder blade edges",
             durationMinutes = 3,
             animationType = AnimationType.CIRCULAR,
+            bodyLocation = BodyLocation.SHOULDER_BLADE,
             steps = listOf(
                 MassageStep(1, "Reach your right hand over your left shoulder, fingers pointing down your back toward your left shoulder blade.", 10),
                 MassageStep(2, "With your elbow pointing upward, use fingertips to find the inner edge of the shoulder blade.", 20),
@@ -84,6 +90,7 @@ object MassageRepository : MassageRepositoryInterface {
             summary = "Long gliding strokes to flush the deltoid muscle",
             durationMinutes = 3,
             animationType = AnimationType.VERTICAL_STROKE,
+            bodyLocation = BodyLocation.OUTER_SHOULDER,
             steps = listOf(
                 MassageStep(1, "Using the opposite hand's thumb, place it at the top of the shoulder cap (acromion).", 10),
                 MassageStep(2, "Apply firm downward pressure and glide the thumb slowly down the outer arm to just above the elbow. Take 5 seconds per stroke.", 60),
@@ -99,6 +106,7 @@ object MassageRepository : MassageRepositoryInterface {
             summary = "Relieves tension in the wrist extensors and flexors",
             durationMinutes = 4,
             animationType = AnimationType.HORIZONTAL_SWEEP,
+            bodyLocation = BodyLocation.FOREARM,
             steps = listOf(
                 MassageStep(1, "Rest your left forearm on your thigh, palm up. Use your right thumb to locate the fleshy muscle bulk just below the elbow on the inner forearm.", 15),
                 MassageStep(2, "Apply moderate pressure with the thumb and make short transverse sweeps across the muscle fibers.", 60),
@@ -113,6 +121,7 @@ object MassageRepository : MassageRepositoryInterface {
             summary = "Targets the thenar eminence and first dorsal interosseous",
             durationMinutes = 3,
             animationType = AnimationType.PRESSURE_PULSE,
+            bodyLocation = BodyLocation.HAND_WEB,
             steps = listOf(
                 MassageStep(1, "Hold your left hand palm-up in your right hand. Use your right thumb to find the fleshy mound at the base of your left thumb (thenar eminence).", 10),
                 MassageStep(2, "Apply firm circular pressure in small circles over the entire thenar area.", 45),

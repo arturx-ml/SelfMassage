@@ -77,6 +77,7 @@ fun MassageDetailContent(
             ElevatedCard(modifier = Modifier.fillMaxWidth()) {
                 MassageAnimationCanvas(
                     animationType = technique.animationType,
+                    bodyLocation = technique.bodyLocation,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

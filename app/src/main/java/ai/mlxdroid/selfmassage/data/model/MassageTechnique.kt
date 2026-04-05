@@ -6,5 +6,6 @@ data class MassageTechnique(
     val summary: String,
     val durationMinutes: Int,
     val steps: List<MassageStep>,
-    val animationType: AnimationType
+    val animationType: AnimationType,
+    val bodyLocation: BodyLocation
 )
