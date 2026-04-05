@@ -22,11 +22,12 @@ class MassageDetailScreenTest {
     )
 
     private fun setScreen(techniqueId: String, onBack: () -> Unit = {}) {
+        val vm = viewModel(techniqueId = techniqueId)
         composeRule.setContent {
             SelfMassageTheme {
                 MassageDetailScreen(
                     onBack = onBack,
-                    viewModel = viewModel(techniqueId = techniqueId)
+                    viewModel = vm
                 )
             }
         }

@@ -16,12 +16,14 @@ class ZoneListScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
 
+    private val viewModel = ZoneListViewModel(GetZonesUseCase(MassageRepository))
+
     private fun setScreen(onZoneClick: (BodyZone) -> Unit = {}) {
         composeRule.setContent {
             SelfMassageTheme {
                 ZoneListScreen(
                     onZoneClick = onZoneClick,
-                    viewModel = ZoneListViewModel(GetZonesUseCase(MassageRepository))
+                    viewModel = viewModel
                 )
             }
         }

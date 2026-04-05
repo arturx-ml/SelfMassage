@@ -27,12 +27,13 @@ class MassageListScreenTest {
         onTechniqueClick: (String, String) -> Unit = { _, _ -> },
         onBack: () -> Unit = {}
     ) {
+        val vm = viewModel(zoneId)
         composeRule.setContent {
             SelfMassageTheme {
                 MassageListScreen(
                     onTechniqueClick = onTechniqueClick,
                     onBack = onBack,
-                    viewModel = viewModel(zoneId)
+                    viewModel = vm
                 )
             }
         }
