@@ -1,9 +1,7 @@
 package ai.mlxdroid.selfmassage.ui.screens
 
-import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.BodyZone
 import ai.mlxdroid.selfmassage.domain.GetZonesUseCase
@@ -46,7 +44,8 @@ class ZoneListScreenTest {
     @Test
     fun techniqueCountSubtitle_forNeck_shows3() {
         setScreen()
-        composeRule.onNodeWithText("3 techniques").assertIsDisplayed()
+        // Neck and Shoulders both have 3 techniques → 2 nodes with this text
+        composeRule.onAllNodesWithText("3 techniques").assertCountEquals(2)
     }
 
     @Test

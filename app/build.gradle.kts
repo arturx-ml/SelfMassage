@@ -64,3 +64,20 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
+
+tasks.register("unitTests") {
+    description = "Runs all unit tests for the project."
+    group = "verification"
+    dependsOn("testDebugUnitTest")
+}
+
+afterEvaluate {
+    tasks.named<Test>("testDebugUnitTest") {
+        outputs.upToDateWhen { false }
+        testLogging {
+            events("passed", "failed", "skipped")
+            showStandardStreams = false
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.SHORT
+        }
+    }
+}

@@ -1,11 +1,7 @@
 package ai.mlxdroid.selfmassage.ui.screens
 
-import androidx.compose.ui.test.assertDoesNotExist
-import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.lifecycle.SavedStateHandle
 import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.domain.GetTechniqueDetailUseCase
@@ -63,7 +59,8 @@ class MassageDetailScreenTest {
     @Test
     fun durationChip_stepOne_30sVisible() {
         setScreen("neck_suboccipital")
-        composeRule.onNodeWithText("30s").assertIsDisplayed()
+        // Steps 1, 2 and 4 all have 30s duration → 3 matching chips
+        composeRule.onAllNodesWithText("30s").assertCountEquals(3)
     }
 
     @Test
