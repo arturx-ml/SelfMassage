@@ -530,23 +530,23 @@ private fun DrawScope.drawBodyLocator(
     outlineColor: Color
 ) {
     val pad = 10.dp.toPx()
-    val panelW = 64.dp.toPx()
-    val panelH = 88.dp.toPx()
+    val panelW = 76.dp.toPx()
+    val panelH = 108.dp.toPx()
     val left = pad
     val top = pad
 
     // Panel background
     drawRoundRect(
-        color = bgColor.copy(alpha = 0.75f),
+        color = bgColor.copy(alpha = 0.80f),
         topLeft = Offset(left, top),
         size = Size(panelW, panelH),
-        cornerRadius = CornerRadius(8.dp.toPx())
+        cornerRadius = CornerRadius(10.dp.toPx())
     )
     drawRoundRect(
-        color = outlineColor.copy(alpha = 0.3f),
+        color = outlineColor.copy(alpha = 0.25f),
         topLeft = Offset(left, top),
         size = Size(panelW, panelH),
-        cornerRadius = CornerRadius(8.dp.toPx()),
+        cornerRadius = CornerRadius(10.dp.toPx()),
         style = Stroke(width = 1.dp.toPx())
     )
 
@@ -556,13 +556,10 @@ private fun DrawScope.drawBodyLocator(
     when (bodyLocation) {
         BodyLocation.BASE_OF_SKULL,
         BodyLocation.LATERAL_NECK,
-        BodyLocation.UPPER_TRAPEZIUS -> drawHeadNeckLocator(
-            bodyLocation, cx, top, panelH, outlineColor, spotColor, pulse
-        )
-
+        BodyLocation.UPPER_TRAPEZIUS,
         BodyLocation.SHOULDER_BLADE,
         BodyLocation.UPPER_SHOULDER,
-        BodyLocation.OUTER_SHOULDER -> drawShoulderLocator(
+        BodyLocation.OUTER_SHOULDER -> drawUpperBodyLocator(
             bodyLocation, cx, top, panelH, outlineColor, spotColor, pulse
         )
 
@@ -573,194 +570,198 @@ private fun DrawScope.drawBodyLocator(
     }
 }
 
-private fun DrawScope.drawHeadNeckLocator(
+// Single continuous bezier path — head + neck + shoulders + torso + upper arms
+private fun DrawScope.drawUpperBodyLocator(
     location: BodyLocation,
     cx: Float, panelTop: Float, panelH: Float,
     outlineColor: Color, spotColor: Color, pulse: Float
 ) {
-    val headRx = 11.dp.toPx()
-    val headRy = 13.dp.toPx()
-    val headCy = panelTop + 22.dp.toPx()
-    val neckTop = headCy + headRy - 2.dp.toPx()
-    val neckBottom = neckTop + 18.dp.toPx()
-    val neckHalfW = 6.dp.toPx()
-    val shoulderY = neckBottom + 2.dp.toPx()
-    val shoulderSpread = 20.dp.toPx()
+    val figTop    = panelTop + 6.dp.toPx()
+    val headCy    = figTop + 14.dp.toPx()
+    val headRx    = 10.dp.toPx()
+    val headRy    = 12.dp.toPx()
+    val neckTopY  = figTop + 26.dp.toPx()
+    val neckBotY  = figTop + 38.dp.toPx()
+    val neckHW    = 6.dp.toPx()
+    val shoulderY = figTop + 44.dp.toPx()
+    val sX        = 30.dp.toPx()   // shoulder half-spread from cx
+    val armpitY   = figTop + 53.dp.toPx()
+    val armBotY   = figTop + 80.dp.toPx()
+    val armOutX   = 30.dp.toPx()   // outer arm x offset from cx
+    val armInX    = 21.dp.toPx()   // inner arm x offset from cx
+    val torsoBot  = panelTop + panelH - 10.dp.toPx()
+    val torsoHW   = 13.dp.toPx()
 
-    // Head
+    // Single closed body path (neck opening → shoulders → arms → torso → back)
+    val bodyPath = Path().apply {
+        // Start at top-left of neck opening
+        moveTo(cx - neckHW, neckTopY)
+        lineTo(cx + neckHW, neckTopY)
+        lineTo(cx + neckHW, neckBotY)
+        // Right trapezius → shoulder tip
+        cubicTo(cx + 10.dp.toPx(), neckBotY + 2.dp.toPx(),
+                cx + 26.dp.toPx(), shoulderY - 1.dp.toPx(),
+                cx + sX, shoulderY)
+        // Right outer arm down to elbow
+        cubicTo(cx + sX + 2.dp.toPx(), shoulderY + 10.dp.toPx(),
+                cx + armOutX + 1.dp.toPx(), armBotY - 10.dp.toPx(),
+                cx + armOutX, armBotY)
+        // Rounded elbow
+        cubicTo(cx + armOutX - 1.dp.toPx(), armBotY + 7.dp.toPx(),
+                cx + armInX + 1.dp.toPx(), armBotY + 7.dp.toPx(),
+                cx + armInX, armBotY)
+        // Right inner arm back up to armpit
+        cubicTo(cx + armInX - 1.dp.toPx(), armBotY - 8.dp.toPx(),
+                cx + 20.dp.toPx(), armpitY + 8.dp.toPx(),
+                cx + 20.dp.toPx(), armpitY)
+        // Right torso side down to bottom
+        cubicTo(cx + 18.dp.toPx(), armpitY + 14.dp.toPx(),
+                cx + torsoHW + 2.dp.toPx(), torsoBot - 8.dp.toPx(),
+                cx + torsoHW, torsoBot)
+        lineTo(cx - torsoHW, torsoBot)
+        // Left torso up to armpit
+        cubicTo(cx - torsoHW - 2.dp.toPx(), torsoBot - 8.dp.toPx(),
+                cx - 18.dp.toPx(), armpitY + 14.dp.toPx(),
+                cx - 20.dp.toPx(), armpitY)
+        // Left inner arm down to elbow
+        cubicTo(cx - 20.dp.toPx(), armpitY + 8.dp.toPx(),
+                cx - armInX + 1.dp.toPx(), armBotY - 8.dp.toPx(),
+                cx - armInX, armBotY)
+        // Left rounded elbow
+        cubicTo(cx - armInX - 1.dp.toPx(), armBotY + 7.dp.toPx(),
+                cx - armOutX + 1.dp.toPx(), armBotY + 7.dp.toPx(),
+                cx - armOutX, armBotY)
+        // Left outer arm up to shoulder
+        cubicTo(cx - armOutX - 1.dp.toPx(), armBotY - 10.dp.toPx(),
+                cx - sX - 2.dp.toPx(), shoulderY + 10.dp.toPx(),
+                cx - sX, shoulderY)
+        // Left trapezius back to neck
+        cubicTo(cx - 26.dp.toPx(), shoulderY - 1.dp.toPx(),
+                cx - 10.dp.toPx(), neckBotY + 2.dp.toPx(),
+                cx - neckHW, neckBotY)
+        lineTo(cx - neckHW, neckTopY)
+        close()
+    }
+
+    // Draw body silhouette
+    drawPath(bodyPath, color = outlineColor.copy(alpha = 0.14f))
+    drawPath(bodyPath, color = outlineColor.copy(alpha = 0.60f),
+             style = Stroke(width = 1.5.dp.toPx(), join = StrokeJoin.Round, cap = StrokeCap.Round))
+
+    // Head (on top of body path so neck junction is hidden)
     drawOval(
-        color = outlineColor.copy(alpha = 0.15f),
+        color = outlineColor.copy(alpha = 0.14f),
         topLeft = Offset(cx - headRx, headCy - headRy),
         size = Size(headRx * 2, headRy * 2)
     )
     drawOval(
-        color = outlineColor.copy(alpha = 0.55f),
+        color = outlineColor.copy(alpha = 0.60f),
         topLeft = Offset(cx - headRx, headCy - headRy),
         size = Size(headRx * 2, headRy * 2),
         style = Stroke(width = 1.5.dp.toPx())
     )
-    // Neck
-    drawRect(
-        color = outlineColor.copy(alpha = 0.15f),
-        topLeft = Offset(cx - neckHalfW, neckTop),
-        size = Size(neckHalfW * 2, neckBottom - neckTop)
-    )
-    drawRect(
-        color = outlineColor.copy(alpha = 0.55f),
-        topLeft = Offset(cx - neckHalfW, neckTop),
-        size = Size(neckHalfW * 2, neckBottom - neckTop),
-        style = Stroke(width = 1.5.dp.toPx())
-    )
-    // Shoulder lines
-    drawLine(
-        color = outlineColor.copy(alpha = 0.55f),
-        start = Offset(cx - neckHalfW, shoulderY),
-        end = Offset(cx - shoulderSpread, shoulderY + 6.dp.toPx()),
-        strokeWidth = 1.5.dp.toPx(),
-        cap = StrokeCap.Round
-    )
-    drawLine(
-        color = outlineColor.copy(alpha = 0.55f),
-        start = Offset(cx + neckHalfW, shoulderY),
-        end = Offset(cx + shoulderSpread, shoulderY + 6.dp.toPx()),
-        strokeWidth = 1.5.dp.toPx(),
-        cap = StrokeCap.Round
-    )
 
-    // Target spot
-    val spotOffset = when (location) {
-        BodyLocation.BASE_OF_SKULL -> Offset(cx, neckTop)
-        BodyLocation.LATERAL_NECK -> Offset(cx + neckHalfW + 3.dp.toPx(), (neckTop + neckBottom) / 2f)
-        else -> Offset(cx + shoulderSpread * 0.55f, shoulderY + 4.dp.toPx()) // UPPER_TRAPEZIUS
+    // Pulsing spot at anatomically correct position
+    val spot = when (location) {
+        BodyLocation.BASE_OF_SKULL     -> Offset(cx, neckTopY)
+        BodyLocation.LATERAL_NECK      -> Offset(cx + neckHW + 5.dp.toPx(), (neckTopY + neckBotY) / 2f)
+        BodyLocation.UPPER_TRAPEZIUS   -> Offset(cx + 18.dp.toPx(), shoulderY - 2.dp.toPx())
+        BodyLocation.SHOULDER_BLADE    -> Offset(cx + 9.dp.toPx(), armpitY + 14.dp.toPx())
+        BodyLocation.UPPER_SHOULDER    -> Offset(cx + sX - 1.dp.toPx(), shoulderY + 2.dp.toPx())
+        else                           -> Offset(cx + armOutX, armpitY - 1.dp.toPx()) // OUTER_SHOULDER
     }
-    drawCircle(color = spotColor.copy(alpha = 0.25f + 0.25f * pulse), radius = 7.dp.toPx(), center = spotOffset)
-    drawCircle(color = spotColor, radius = 3.5.dp.toPx(), center = spotOffset)
+    drawCircle(color = spotColor.copy(alpha = 0.20f + 0.20f * pulse), radius = 9.dp.toPx(), center = spot)
+    drawCircle(color = spotColor, radius = 4.dp.toPx(), center = spot)
 }
 
-private fun DrawScope.drawShoulderLocator(
-    location: BodyLocation,
-    cx: Float, panelTop: Float, panelH: Float,
-    outlineColor: Color, spotColor: Color, pulse: Float
-) {
-    val neckTop = panelTop + 14.dp.toPx()
-    val neckHalfW = 5.dp.toPx()
-    val neckH = 10.dp.toPx()
-    val shoulderY = neckTop + neckH
-    val shoulderSpread = 22.dp.toPx()
-    val torsoBottom = panelTop + panelH - 14.dp.toPx()
-
-    // Neck stub
-    drawRect(
-        color = outlineColor.copy(alpha = 0.15f),
-        topLeft = Offset(cx - neckHalfW, neckTop),
-        size = Size(neckHalfW * 2, neckH)
-    )
-    drawRect(
-        color = outlineColor.copy(alpha = 0.55f),
-        topLeft = Offset(cx - neckHalfW, neckTop),
-        size = Size(neckHalfW * 2, neckH),
-        style = Stroke(width = 1.5.dp.toPx())
-    )
-    // Shoulder lines
-    val leftShoulderEnd = Offset(cx - shoulderSpread, shoulderY + 4.dp.toPx())
-    val rightShoulderEnd = Offset(cx + shoulderSpread, shoulderY + 4.dp.toPx())
-    drawLine(
-        color = outlineColor.copy(alpha = 0.55f),
-        start = Offset(cx - neckHalfW, shoulderY),
-        end = leftShoulderEnd,
-        strokeWidth = 1.5.dp.toPx(), cap = StrokeCap.Round
-    )
-    drawLine(
-        color = outlineColor.copy(alpha = 0.55f),
-        start = Offset(cx + neckHalfW, shoulderY),
-        end = rightShoulderEnd,
-        strokeWidth = 1.5.dp.toPx(), cap = StrokeCap.Round
-    )
-    // Torso outline (curved upper back)
-    val torsoPath = Path().apply {
-        moveTo(leftShoulderEnd.x, leftShoulderEnd.y)
-        cubicTo(
-            leftShoulderEnd.x, leftShoulderEnd.y + 10.dp.toPx(),
-            cx - 14.dp.toPx(), torsoBottom - 8.dp.toPx(),
-            cx - 12.dp.toPx(), torsoBottom
-        )
-        lineTo(cx + 12.dp.toPx(), torsoBottom)
-        cubicTo(
-            cx + 14.dp.toPx(), torsoBottom - 8.dp.toPx(),
-            rightShoulderEnd.x, rightShoulderEnd.y + 10.dp.toPx(),
-            rightShoulderEnd.x, rightShoulderEnd.y
-        )
-    }
-    drawPath(torsoPath, color = outlineColor.copy(alpha = 0.12f))
-    drawPath(torsoPath, color = outlineColor.copy(alpha = 0.55f), style = Stroke(width = 1.5.dp.toPx(), join = StrokeJoin.Round))
-
-    // Target spot
-    val spotOffset = when (location) {
-        BodyLocation.SHOULDER_BLADE -> Offset(cx + 8.dp.toPx(), shoulderY + 18.dp.toPx())
-        BodyLocation.UPPER_SHOULDER -> rightShoulderEnd
-        else -> Offset(cx + shoulderSpread + 2.dp.toPx(), rightShoulderEnd.y + 2.dp.toPx()) // OUTER_SHOULDER
-    }
-    drawCircle(color = spotColor.copy(alpha = 0.25f + 0.25f * pulse), radius = 7.dp.toPx(), center = spotOffset)
-    drawCircle(color = spotColor, radius = 3.5.dp.toPx(), center = spotOffset)
-}
-
+// Arm close-up: forearm tapering to wrist + palm + thumb + finger hints
 private fun DrawScope.drawArmLocator(
     location: BodyLocation,
     cx: Float, panelTop: Float, panelH: Float,
     outlineColor: Color, spotColor: Color, pulse: Float
 ) {
-    val armHalfW = 9.dp.toPx()
-    val armTop = panelTop + 10.dp.toPx()
-    val handTop = panelTop + panelH - 30.dp.toPx()
-    val armBottom = handTop
+    val elbowY    = panelTop + 12.dp.toPx()
+    val wristY    = panelTop + 72.dp.toPx()
+    val armHW     = 9.dp.toPx()
+    val wristHW   = 7.dp.toPx()
+    val palmBotY  = panelTop + 96.dp.toPx()
+    val thumbTipX = cx + 19.dp.toPx()
+    val thumbMidY = wristY + 13.dp.toPx()
 
-    // Forearm rounded rect
-    drawRoundRect(
-        color = outlineColor.copy(alpha = 0.15f),
-        topLeft = Offset(cx - armHalfW, armTop),
-        size = Size(armHalfW * 2, armBottom - armTop),
-        cornerRadius = CornerRadius(armHalfW)
-    )
-    drawRoundRect(
-        color = outlineColor.copy(alpha = 0.55f),
-        topLeft = Offset(cx - armHalfW, armTop),
-        size = Size(armHalfW * 2, armBottom - armTop),
-        cornerRadius = CornerRadius(armHalfW),
+    // Elbow hint (small arc at top)
+    drawArc(
+        color = outlineColor.copy(alpha = 0.30f),
+        startAngle = 180f, sweepAngle = 180f,
+        useCenter = false,
+        topLeft = Offset(cx - armHW, elbowY - 5.dp.toPx()),
+        size = Size(armHW * 2, 10.dp.toPx()),
         style = Stroke(width = 1.5.dp.toPx())
     )
-    // Hand oval
-    val handRx = 11.dp.toPx()
-    val handRy = 8.dp.toPx()
-    val handCy = handTop + handRy
-    drawOval(
-        color = outlineColor.copy(alpha = 0.15f),
-        topLeft = Offset(cx - handRx, handCy - handRy),
-        size = Size(handRx * 2, handRy * 2)
-    )
-    drawOval(
-        color = outlineColor.copy(alpha = 0.55f),
-        topLeft = Offset(cx - handRx, handCy - handRy),
-        size = Size(handRx * 2, handRy * 2),
-        style = Stroke(width = 1.5.dp.toPx())
-    )
-    // Finger stubs
+
+    // Arm + hand single closed path
+    val armPath = Path().apply {
+        moveTo(cx - armHW, elbowY)
+        // Left outer arm, tapering toward wrist
+        cubicTo(cx - armHW - 1.dp.toPx(), elbowY + 20.dp.toPx(),
+                cx - wristHW - 1.dp.toPx(), wristY - 10.dp.toPx(),
+                cx - wristHW, wristY)
+        // Palm left side to bottom-left
+        cubicTo(cx - 11.dp.toPx(), wristY + 5.dp.toPx(),
+                cx - 12.dp.toPx(), palmBotY - 6.dp.toPx(),
+                cx - 8.dp.toPx(), palmBotY)
+        // Across finger base (gentle rounded curve)
+        cubicTo(cx - 3.dp.toPx(), palmBotY + 3.dp.toPx(),
+                cx + 3.dp.toPx(), palmBotY + 3.dp.toPx(),
+                cx + 8.dp.toPx(), palmBotY)
+        // Up right side of palm to wrist
+        cubicTo(cx + 10.dp.toPx(), palmBotY - 4.dp.toPx(),
+                cx + wristHW + 2.dp.toPx(), wristY + 8.dp.toPx(),
+                cx + wristHW, wristY)
+        // Right outer arm back up to elbow
+        cubicTo(cx + wristHW + 1.dp.toPx(), wristY - 10.dp.toPx(),
+                cx + armHW + 1.dp.toPx(), elbowY + 20.dp.toPx(),
+                cx + armHW, elbowY)
+        close()
+    }
+
+    // Thumb blob
+    val thumbPath = Path().apply {
+        moveTo(cx + wristHW, wristY + 5.dp.toPx())
+        cubicTo(cx + wristHW + 4.dp.toPx(), wristY - 1.dp.toPx(),
+                thumbTipX + 2.dp.toPx(), thumbMidY - 6.dp.toPx(),
+                thumbTipX, thumbMidY)
+        cubicTo(thumbTipX - 2.dp.toPx(), thumbMidY + 6.dp.toPx(),
+                cx + wristHW + 3.dp.toPx(), wristY + 15.dp.toPx(),
+                cx + wristHW, wristY + 12.dp.toPx())
+        close()
+    }
+
+    // Fill then stroke arm and thumb
+    drawPath(armPath, color = outlineColor.copy(alpha = 0.14f))
+    drawPath(thumbPath, color = outlineColor.copy(alpha = 0.14f))
+    drawPath(armPath, color = outlineColor.copy(alpha = 0.60f),
+             style = Stroke(width = 1.5.dp.toPx(), join = StrokeJoin.Round, cap = StrokeCap.Round))
+    drawPath(thumbPath, color = outlineColor.copy(alpha = 0.60f),
+             style = Stroke(width = 1.5.dp.toPx(), join = StrokeJoin.Round, cap = StrokeCap.Round))
+
+    // Finger knuckle divider lines
     for (i in -1..1) {
         val fx = cx + i * 5.dp.toPx()
         drawLine(
-            color = outlineColor.copy(alpha = 0.4f),
-            start = Offset(fx, armTop),
-            end = Offset(fx, armTop - 5.dp.toPx()),
-            strokeWidth = 2.5.dp.toPx(), cap = StrokeCap.Round
+            color = outlineColor.copy(alpha = 0.30f),
+            start = Offset(fx, palmBotY - 2.dp.toPx()),
+            end = Offset(fx, palmBotY - 8.dp.toPx()),
+            strokeWidth = 1.dp.toPx(), cap = StrokeCap.Round
         )
     }
 
-    // Target spot
-    val spotOffset = when (location) {
-        BodyLocation.FOREARM -> Offset(cx, (armTop + armBottom) / 2f)
-        else -> Offset(cx + 5.dp.toPx(), handCy) // HAND_WEB
+    // Pulsing spot
+    val spot = when (location) {
+        BodyLocation.FOREARM -> Offset(cx, (elbowY + wristY) / 2f)
+        else                 -> Offset(cx + wristHW + 5.dp.toPx(), wristY + 10.dp.toPx()) // HAND_WEB
     }
-    drawCircle(color = spotColor.copy(alpha = 0.25f + 0.25f * pulse), radius = 7.dp.toPx(), center = spotOffset)
-    drawCircle(color = spotColor, radius = 3.5.dp.toPx(), center = spotOffset)
+    drawCircle(color = spotColor.copy(alpha = 0.20f + 0.20f * pulse), radius = 9.dp.toPx(), center = spot)
+    drawCircle(color = spotColor, radius = 4.dp.toPx(), center = spot)
 }
 
 // ─── Helper: draw a centered text label ──────────────────────────────────────
