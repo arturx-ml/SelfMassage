@@ -29,7 +29,7 @@ object MassageRepository : MassageRepositoryInterface {
             id = "neck_lateral_flex",
             name = "Lateral Neck Stretch & Friction",
             summary = "Targets sternocleidomastoid and scalene muscles",
-            durationMinutes = 4,
+            durationMinutes = 3,
             animationType = AnimationType.VERTICAL_STROKE,
             bodyLocation = BodyLocation.LATERAL_NECK,
             steps = listOf(
@@ -43,7 +43,7 @@ object MassageRepository : MassageRepositoryInterface {
             id = "neck_trapezius_knead",
             name = "Upper Trapezius Kneading",
             summary = "Classic knead for the neck-shoulder junction",
-            durationMinutes = 5,
+            durationMinutes = 4,
             animationType = AnimationType.CIRCULAR,
             bodyLocation = BodyLocation.UPPER_TRAPEZIUS,
             steps = listOf(
@@ -74,7 +74,7 @@ object MassageRepository : MassageRepositoryInterface {
             id = "shoulder_blade_squeeze",
             name = "Periscapular Release",
             summary = "Relieves tension around the shoulder blade edges",
-            durationMinutes = 3,
+            durationMinutes = 4,
             animationType = AnimationType.CIRCULAR,
             bodyLocation = BodyLocation.SHOULDER_BLADE,
             steps = listOf(
@@ -139,7 +139,7 @@ object MassageRepository : MassageRepositoryInterface {
             name = "Morning Neck Reset",
             description = "A gentle wake-up sequence targeting the base of the skull and neck-shoulder junction to ease overnight stiffness.",
             iconName = "SelfImprovement",
-            durationMinutes = 6,
+            durationMinutes = 7,
             techniqueIds = listOf("neck_suboccipital", "neck_trapezius_knead")
         ),
         Routine(
