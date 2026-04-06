@@ -1,6 +1,12 @@
 package ai.mlxdroid.selfmassage.ui.screens
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,29 +18,32 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Pause
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.SkipNext
-import androidx.compose.material.icons.outlined.SkipPrevious
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,7 +54,10 @@ import ai.mlxdroid.selfmassage.data.model.AnimationType
 import ai.mlxdroid.selfmassage.data.model.BodyLocation
 import ai.mlxdroid.selfmassage.data.model.SessionStep
 import ai.mlxdroid.selfmassage.ui.components.MassageAnimationCanvas
+import ai.mlxdroid.selfmassage.ui.components.PrimaryButton
+import ai.mlxdroid.selfmassage.ui.theme.GradientStart
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
+import ai.mlxdroid.selfmassage.ui.theme.TrackGray
 import ai.mlxdroid.selfmassage.ui.viewmodel.SessionUiState
 import ai.mlxdroid.selfmassage.ui.viewmodel.SessionViewModel
 
@@ -65,7 +77,6 @@ fun SessionScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SessionContent(
     uiState: SessionUiState,
@@ -82,129 +93,219 @@ fun SessionContent(
 
     val currentStep = uiState.steps.getOrNull(uiState.currentIndex)
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(currentStep?.techniqueName ?: "") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { innerPadding ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Minimal top bar
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .padding(start = 8.dp, end = 8.dp, top = 40.dp, bottom = 8.dp)
         ) {
-            if (currentStep != null) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Outlined.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Text(
+                currentStep?.techniqueName ?: "",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.size(48.dp))
+        }
+
+        // Animation panel
+        if (currentStep != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Brush.linearGradient(listOf(GradientStart, MaterialTheme.colorScheme.surfaceVariant)))
+            ) {
                 MassageAnimationCanvas(
                     animationType = currentStep.animationType,
                     bodyLocation = currentStep.bodyLocation,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxSize()
                 )
-
-                Spacer(Modifier.height(12.dp))
-
-                Text(
-                    text = "Step ${currentStep.stepOrder} of ${currentStep.totalStepsInTechnique}  ·  ${currentStep.techniqueName}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-
-                Spacer(Modifier.height(8.dp))
-
-                if (uiState.isPreparing) {
-                    Text(
-                        text = "Get Ready",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.secondary,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(Modifier.height(4.dp))
-                }
-
-                Text(
-                    text = currentStep.instruction,
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 24.dp)
-                )
-
-                Spacer(Modifier.height(24.dp))
-
-                if (uiState.isPreparing) {
-                    CountdownRing(
-                        secondsRemaining = uiState.prepSecondsRemaining,
-                        totalSeconds = 5,
-                        arcColor = MaterialTheme.colorScheme.secondary
-                    )
-                } else {
-                    CountdownRing(
-                        secondsRemaining = uiState.secondsRemaining,
-                        totalSeconds = currentStep.durationSeconds
-                    )
-                }
-
-                Spacer(Modifier.height(24.dp))
             }
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 32.dp)
-            ) {
-                IconButton(onClick = onSkipPrevious, enabled = uiState.currentIndex > 0) {
-                    Icon(Icons.Outlined.SkipPrevious, contentDescription = "Previous step")
-                }
+            Spacer(Modifier.height(16.dp))
 
-                FilledIconButton(
-                    onClick = if (uiState.isPlaying) onPause else onPlay,
-                    modifier = Modifier.size(56.dp)
-                ) {
+            // Step indicator
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            ) {
+                Text(
+                    "Step ${currentStep.stepOrder} of ${currentStep.totalStepsInTechnique}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    "\u2022",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    currentStep.techniqueName,
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // GET READY badge
+            if (uiState.isPreparing) {
+                val pulse = rememberInfiniteTransition(label = "prep")
+                val alpha by pulse.animateFloat(
+                    initialValue = 0.6f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(tween(800), RepeatMode.Reverse),
+                    label = "prepAlpha"
+                )
+                Text(
+                    "GET READY",
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 1.5.sp
+                    ),
+                    color = Color.White,
+                    modifier = Modifier
+                        .alpha(alpha)
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.secondary)
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                )
+                Spacer(Modifier.height(16.dp))
+            }
+
+            // Instruction
+            Text(
+                currentStep.instruction,
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 24.dp)
+            )
+
+            Spacer(Modifier.height(32.dp))
+
+            // Countdown ring
+            CountdownRing(
+                secondsRemaining = if (uiState.isPreparing) uiState.prepSecondsRemaining else uiState.secondsRemaining,
+                totalSeconds = if (uiState.isPreparing) 5 else currentStep.durationSeconds,
+                isPreparing = uiState.isPreparing
+            )
+
+            Spacer(Modifier.height(32.dp))
+        }
+
+        // Controls
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 40.dp)
+        ) {
+            // Previous
+            IconButton(
+                onClick = onSkipPrevious,
+                enabled = uiState.currentIndex > 0,
+                modifier = Modifier.size(44.dp)
+            ) {
+                Icon(
+                    Icons.Filled.SkipPrevious,
+                    contentDescription = "Previous",
+                    tint = if (uiState.currentIndex > 0)
+                        MaterialTheme.colorScheme.primary
+                    else TrackGray,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // Play/Pause
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(64.dp)
+                    .shadow(8.dp, CircleShape)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            ) {
+                IconButton(onClick = if (uiState.isPlaying) onPause else onPlay) {
                     Icon(
-                        imageVector = if (uiState.isPlaying) Icons.Outlined.Pause else Icons.Outlined.PlayArrow,
-                        contentDescription = if (uiState.isPlaying) "Pause" else "Play"
+                        if (uiState.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                        contentDescription = if (uiState.isPlaying) "Pause" else "Play",
+                        tint = Color.White,
+                        modifier = Modifier.size(28.dp)
                     )
                 }
+            }
 
-                IconButton(onClick = onSkipNext) {
-                    Icon(Icons.Outlined.SkipNext, contentDescription = "Next step")
-                }
+            // Next
+            IconButton(
+                onClick = onSkipNext,
+                modifier = Modifier.size(44.dp)
+            ) {
+                Icon(
+                    Icons.Filled.SkipNext,
+                    contentDescription = "Next",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }
 }
 
 @Composable
-private fun CountdownRing(
-    secondsRemaining: Int,
-    totalSeconds: Int,
-    arcColor: Color = MaterialTheme.colorScheme.primary
-) {
+private fun CountdownRing(secondsRemaining: Int, totalSeconds: Int, isPreparing: Boolean) {
     val progress = if (totalSeconds > 0) secondsRemaining.toFloat() / totalSeconds else 0f
-    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+    val primary = MaterialTheme.colorScheme.primary
+    val secondary = MaterialTheme.colorScheme.secondary
+    val arcColor = if (isPreparing) secondary else primary
+    val glowColor = if (isPreparing) secondary else primary
 
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(120.dp)) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(152.dp)) {
+        // Outer glow
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val stroke = Stroke(width = 8.dp.toPx())
-            val inset = stroke.width / 2
-            val arcSize = androidx.compose.ui.geometry.Size(size.width - stroke.width, size.height - stroke.width)
-            val topLeft = androidx.compose.ui.geometry.Offset(inset, inset)
-            drawArc(color = trackColor, startAngle = 0f, sweepAngle = 360f, useCenter = false, style = stroke, topLeft = topLeft, size = arcSize)
-            drawArc(color = arcColor, startAngle = -90f, sweepAngle = 360f * progress, useCenter = false, style = stroke, topLeft = topLeft, size = arcSize)
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(glowColor.copy(alpha = 0.08f), Color.Transparent),
+                    radius = size.minDimension / 2
+                )
+            )
         }
+
+        // Ring
+        Canvas(modifier = Modifier.size(120.dp)) {
+            val stroke = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
+            val arcSize = androidx.compose.ui.geometry.Size(size.width - stroke.width, size.height - stroke.width)
+            val topLeft = androidx.compose.ui.geometry.Offset(stroke.width / 2, stroke.width / 2)
+            drawArc(color = TrackGray, 0f, 360f, false, style = stroke, topLeft = topLeft, size = arcSize)
+            drawArc(color = arcColor, -90f, 360f * progress, false, style = stroke, topLeft = topLeft, size = arcSize)
+        }
+
+        // Time
         Text(
-            text = "$secondsRemaining",
-            style = MaterialTheme.typography.headlineLarge.copy(fontSize = 36.sp),
+            "$secondsRemaining",
+            style = MaterialTheme.typography.headlineLarge.copy(
+                fontSize = 48.sp,
+                fontWeight = FontWeight.SemiBold
+            ),
             color = MaterialTheme.colorScheme.onSurface
         )
     }
@@ -212,95 +313,77 @@ private fun CountdownRing(
 
 @Composable
 private fun SessionCompleteOverlay(onDone: () -> Unit) {
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    // Dark scrim + centered card
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.4f))
+    ) {
         Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(24.dp)
+                .clip(RoundedCornerShape(28.dp))
+                .background(Color.White)
+                .padding(32.dp)
         ) {
-            Text("Session Complete!", style = MaterialTheme.typography.headlineMedium)
-            Spacer(Modifier.height(8.dp))
-            Text(
-                "Great work! Take a moment to breathe and relax.",
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(32.dp))
-            Button(onClick = onDone, modifier = Modifier.fillMaxWidth()) {
-                Text("Done")
+            // Checkmark circle
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            ) {
+                Icon(
+                    Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(40.dp)
+                )
             }
+
+            Spacer(Modifier.height(24.dp))
+
+            Text(
+                "Well done!",
+                style = MaterialTheme.typography.headlineLarge
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            Text(
+                "You've completed your session. Keep up the great work on your wellness journey.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(32.dp))
+
+            PrimaryButton(text = "Done", onClick = onDone)
         }
     }
 }
 
-@Preview(showBackground = true, name = "Session Screen – Get Ready")
+@Preview(showBackground = true)
 @Composable
 private fun SessionContentPrepPreview() {
     SelfMassageTheme {
         SessionContent(
             uiState = SessionUiState(
                 steps = listOf(
-                    SessionStep(
-                        techniqueName = "Suboccipital Release",
-                        animationType = AnimationType.PRESSURE_PULSE,
-                        bodyLocation = BodyLocation.BASE_OF_SKULL,
-                        stepOrder = 2,
-                        totalStepsInTechnique = 4,
-                        instruction = "Apply gentle upward pressure with both middle fingers into the two small hollows on either side of the spine.",
-                        durationSeconds = 30
-                    )
+                    SessionStep("Suboccipital Release", AnimationType.PRESSURE_PULSE, BodyLocation.BASE_OF_SKULL, 2, 4, "Apply gentle upward pressure.", 30)
                 ),
-                currentIndex = 0,
-                secondsRemaining = 30,
-                prepSecondsRemaining = 4,
-                isPlaying = true,
-                isFinished = false
+                currentIndex = 0, secondsRemaining = 30, prepSecondsRemaining = 4, isPlaying = true, isFinished = false
             ),
-            onBack = {},
-            onPlay = {},
-            onPause = {},
-            onSkipNext = {},
-            onSkipPrevious = {}
+            onBack = {}, onPlay = {}, onPause = {}, onSkipNext = {}, onSkipPrevious = {}
         )
     }
 }
 
-@Preview(showBackground = true, name = "Session Screen – Playing")
-@Composable
-private fun SessionContentPlayingPreview() {
-    SelfMassageTheme {
-        SessionContent(
-            uiState = SessionUiState(
-                steps = listOf(
-                    SessionStep(
-                        techniqueName = "Suboccipital Release",
-                        animationType = AnimationType.PRESSURE_PULSE,
-                        bodyLocation = BodyLocation.BASE_OF_SKULL,
-                        stepOrder = 2,
-                        totalStepsInTechnique = 4,
-                        instruction = "Apply gentle upward pressure with both middle fingers into the two small hollows on either side of the spine.",
-                        durationSeconds = 30
-                    )
-                ),
-                currentIndex = 0,
-                secondsRemaining = 20,
-                prepSecondsRemaining = 0,
-                isPlaying = true,
-                isFinished = false
-            ),
-            onBack = {},
-            onPlay = {},
-            onPause = {},
-            onSkipNext = {},
-            onSkipPrevious = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Session Complete")
+@Preview(showBackground = true)
 @Composable
 private fun SessionCompletePreview() {
     SelfMassageTheme {

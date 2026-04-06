@@ -1,42 +1,45 @@
 package ai.mlxdroid.selfmassage.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
-import androidx.compose.material.icons.outlined.FitnessCenter
-import androidx.compose.material.icons.outlined.SelfImprovement
-import androidx.compose.material.icons.outlined.Straighten
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.Eco
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.Routine
+import ai.mlxdroid.selfmassage.ui.components.AccentChip
+import ai.mlxdroid.selfmassage.ui.components.GradientHeader
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
 import ai.mlxdroid.selfmassage.ui.viewmodel.RoutineListViewModel
+import java.util.Calendar
 
 @Composable
 fun RoutineListScreen(
@@ -46,95 +49,96 @@ fun RoutineListScreen(
     RoutineListContent(routines = viewModel.routines, onRoutineClick = onRoutineClick)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineListContent(
     routines: List<Routine>,
     onRoutineClick: (Routine) -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Routines") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
-    ) { innerPadding ->
+    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    val greeting = when {
+        hour < 12 -> "Good morning"
+        hour < 18 -> "Good afternoon"
+        else -> "Good evening"
+    }
+
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        GradientHeader(title = greeting, subtitle = "Start a guided routine")
+
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(top = 4.dp, bottom = 80.dp)
         ) {
-            items(routines) { routine ->
-                RoutineCard(
-                    routine = routine,
-                    onClick = { onRoutineClick(routine) },
-                    modifier = Modifier.padding(vertical = 6.dp)
-                )
+            items(routines, key = { it.id }) { routine ->
+                RoutineCard(routine = routine, onClick = { onRoutineClick(routine) })
             }
         }
     }
 }
 
 @Composable
-private fun RoutineCard(
-    routine: Routine,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    ElevatedCard(modifier = modifier.clickable(onClick = onClick)) {
-        ListItem(
-            headlineContent = { Text(routine.name, style = MaterialTheme.typography.titleMedium) },
-            supportingContent = {
-                Text(
-                    routine.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1
-                )
-            },
-            leadingContent = {
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        Icon(
-                            imageVector = routineIcon(routine.iconName),
-                            contentDescription = routine.name,
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    }
+private fun RoutineCard(routine: Routine, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(6.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.10f))
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White)
+            .clickable(onClick = onClick)
+            .padding(20.dp)
+    ) {
+        // Decorative leaf
+        Icon(
+            Icons.Outlined.Eco,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .size(80.dp)
+                .align(Alignment.BottomEnd)
+                .alpha(0.08f)
+        )
+
+        Column {
+            Text(routine.name, style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                routine.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2
+            )
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AccentChip("${routine.durationMinutes} min")
+                    AccentChip("${routine.techniqueIds.size} techniques")
                 }
-            },
-            trailingContent = {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
                 ) {
-                    AssistChip(onClick = {}, label = { Text("${routine.durationMinutes} min") })
                     Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        Icons.AutoMirrored.Outlined.ArrowForward,
+                        contentDescription = "Open",
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             }
-        )
+        }
     }
 }
 
-private fun routineIcon(iconName: String): ImageVector = when (iconName) {
-    "FitnessCenter" -> Icons.Outlined.FitnessCenter
-    "Straighten" -> Icons.Outlined.Straighten
-    else -> Icons.Outlined.SelfImprovement
-}
-
-@Preview(showBackground = true, name = "Routine List Screen")
+@Preview(showBackground = true)
 @Composable
 private fun RoutineListContentPreview() {
     SelfMassageTheme {
