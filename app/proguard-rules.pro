@@ -1,21 +1,32 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Keep line numbers for crash reports
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# kotlinx-serialization — keep @Serializable classes
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepclassmembers class kotlinx.serialization.json.** {
+    *** Companion;
+}
+-keepclasseswithmembers class kotlinx.serialization.json.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+-keep,includedescriptorclasses class ai.mlxdroid.selfmassage.**$$serializer { *; }
+-keepclassmembers class ai.mlxdroid.selfmassage.** {
+    *** Companion;
+}
+-keepclasseswithmembers class ai.mlxdroid.selfmassage.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# Hilt — keep generated components
+-keep class dagger.hilt.** { *; }
+-keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper { *; }
+
+# Data models — keep fields for reflection if needed
+-keep class ai.mlxdroid.selfmassage.data.model.** { *; }
+
+# Navigation routes — keep @Serializable route classes
+-keep class ai.mlxdroid.selfmassage.navigation.** { *; }

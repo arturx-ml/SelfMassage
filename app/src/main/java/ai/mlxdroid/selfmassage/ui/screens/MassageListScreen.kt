@@ -34,6 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 import ai.mlxdroid.selfmassage.ui.components.AccentChip
+import ai.mlxdroid.selfmassage.ui.components.ErrorPlaceholder
 import ai.mlxdroid.selfmassage.ui.components.GradientHeader
 import ai.mlxdroid.selfmassage.ui.theme.PrimaryLight
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
@@ -46,12 +47,16 @@ fun MassageListScreen(
     viewModel: MassageListViewModel = hiltViewModel()
 ) {
     val state = viewModel.uiState
-    MassageListContent(
-        zoneName = state.zone?.name ?: "",
-        techniques = state.techniques,
-        onTechniqueClick = { techniqueId -> onTechniqueClick(viewModel.zoneId, techniqueId) },
-        onBack = onBack
-    )
+    if (state.error != null) {
+        ErrorPlaceholder(message = state.error, onBack = onBack)
+    } else {
+        MassageListContent(
+            zoneName = state.zone?.name ?: "",
+            techniques = state.techniques,
+            onTechniqueClick = { techniqueId -> onTechniqueClick(viewModel.zoneId, techniqueId) },
+            onBack = onBack
+        )
+    }
 }
 
 @Composable
@@ -145,5 +150,13 @@ private fun MassageListContentPreview() {
             onTechniqueClick = {},
             onBack = {}
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MassageListErrorPreview() {
+    SelfMassageTheme {
+        ErrorPlaceholder(message = "Zone not found", onBack = {})
     }
 }

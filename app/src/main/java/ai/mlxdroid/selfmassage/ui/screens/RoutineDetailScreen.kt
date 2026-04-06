@@ -34,6 +34,7 @@ import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 import ai.mlxdroid.selfmassage.data.model.Routine
 import ai.mlxdroid.selfmassage.ui.components.AccentChip
+import ai.mlxdroid.selfmassage.ui.components.ErrorPlaceholder
 import ai.mlxdroid.selfmassage.ui.components.PrimaryButton
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
 import ai.mlxdroid.selfmassage.ui.viewmodel.RoutineDetailViewModel
@@ -44,13 +45,15 @@ fun RoutineDetailScreen(
     onStartRoutine: (routineId: String) -> Unit,
     viewModel: RoutineDetailViewModel = hiltViewModel()
 ) {
-    val routine = viewModel.routine ?: return
-    RoutineDetailContent(
-        routine = routine,
-        techniques = viewModel.techniques,
-        onBack = onBack,
-        onStartRoutine = { onStartRoutine(routine.id) }
-    )
+    when {
+        viewModel.error != null -> ErrorPlaceholder(message = viewModel.error!!, onBack = onBack)
+        viewModel.routine != null -> RoutineDetailContent(
+            routine = viewModel.routine!!,
+            techniques = viewModel.techniques,
+            onBack = onBack,
+            onStartRoutine = { onStartRoutine(viewModel.routine!!.id) }
+        )
+    }
 }
 
 @Composable
@@ -187,5 +190,13 @@ private fun RoutineDetailContentPreview() {
             onBack = {},
             onStartRoutine = {}
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RoutineDetailErrorPreview() {
+    SelfMassageTheme {
+        ErrorPlaceholder(message = "Routine not found", onBack = {})
     }
 }

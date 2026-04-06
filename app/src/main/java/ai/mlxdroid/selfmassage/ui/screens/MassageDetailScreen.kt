@@ -43,6 +43,7 @@ import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.MassageStep
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 import ai.mlxdroid.selfmassage.ui.components.AccentChip
+import ai.mlxdroid.selfmassage.ui.components.ErrorPlaceholder
 import ai.mlxdroid.selfmassage.ui.components.MassageAnimationCanvas
 import ai.mlxdroid.selfmassage.ui.components.PrimaryButton
 import ai.mlxdroid.selfmassage.ui.theme.GradientStart
@@ -56,8 +57,14 @@ fun MassageDetailScreen(
     onStartSession: (techniqueId: String) -> Unit = {},
     viewModel: MassageDetailViewModel = hiltViewModel()
 ) {
-    val technique = viewModel.technique ?: return
-    MassageDetailContent(technique = technique, onBack = onBack, onStartSession = onStartSession)
+    when {
+        viewModel.error != null -> ErrorPlaceholder(message = viewModel.error!!, onBack = onBack)
+        viewModel.technique != null -> MassageDetailContent(
+            technique = viewModel.technique!!,
+            onBack = onBack,
+            onStartSession = onStartSession
+        )
+    }
 }
 
 @Composable
@@ -236,5 +243,13 @@ private fun MassageDetailContentPreview() {
             technique = MassageRepository.techniqueById("neck_suboccipital")!!,
             onBack = {}
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MassageDetailErrorPreview() {
+    SelfMassageTheme {
+        ErrorPlaceholder(message = "Technique not found", onBack = {})
     }
 }

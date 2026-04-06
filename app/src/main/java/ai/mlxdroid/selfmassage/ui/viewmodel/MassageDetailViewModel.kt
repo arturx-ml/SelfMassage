@@ -13,8 +13,15 @@ class MassageDetailViewModel @Inject constructor(
     getTechniqueDetail: GetTechniqueDetailUseCase
 ) : ViewModel() {
 
-    val technique: MassageTechnique? = run {
-        val techniqueId: String = checkNotNull(savedStateHandle["techniqueId"])
+    private val techniqueId: String = savedStateHandle["techniqueId"] ?: ""
+
+    val technique: MassageTechnique? = if (techniqueId.isNotEmpty()) {
         getTechniqueDetail(techniqueId)
+    } else null
+
+    val error: String? = when {
+        techniqueId.isEmpty() -> "Technique not found"
+        technique == null -> "Technique not found"
+        else -> null
     }
 }

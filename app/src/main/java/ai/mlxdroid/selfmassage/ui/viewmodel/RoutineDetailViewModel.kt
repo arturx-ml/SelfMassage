@@ -16,7 +16,18 @@ class RoutineDetailViewModel @Inject constructor(
     repository: MassageRepositoryInterface
 ) : ViewModel() {
 
-    val routine: Routine? = getRoutineDetail(checkNotNull(savedStateHandle["routineId"]))
+    private val routineId: String = savedStateHandle["routineId"] ?: ""
+
+    val routine: Routine? = if (routineId.isNotEmpty()) {
+        getRoutineDetail(routineId)
+    } else null
+
     val techniques: List<MassageTechnique> = routine?.techniqueIds
         ?.mapNotNull { repository.techniqueById(it) } ?: emptyList()
+
+    val error: String? = when {
+        routineId.isEmpty() -> "Routine not found"
+        routine == null -> "Routine not found"
+        else -> null
+    }
 }

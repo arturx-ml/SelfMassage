@@ -9,8 +9,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 data class MassageListUiState(
-    val zone: BodyZone?,
-    val techniques: List<MassageTechnique>
+    val zone: BodyZone? = null,
+    val techniques: List<MassageTechnique> = emptyList(),
+    val error: String? = null
 )
 
 @HiltViewModel
@@ -19,10 +20,12 @@ class MassageListViewModel @Inject constructor(
     getTechniquesForZone: GetTechniquesForZoneUseCase
 ) : ViewModel() {
 
-    val zoneId: String = checkNotNull(savedStateHandle["zoneId"])
+    val zoneId: String = savedStateHandle["zoneId"] ?: ""
 
-    val uiState: MassageListUiState = run {
+    val uiState: MassageListUiState = if (zoneId.isNotEmpty()) {
         val (zone, techniques) = getTechniquesForZone(zoneId)
         MassageListUiState(zone = zone, techniques = techniques)
+    } else {
+        MassageListUiState(error = "Zone not found")
     }
 }
