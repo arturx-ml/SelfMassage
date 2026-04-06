@@ -37,6 +37,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -146,7 +148,11 @@ fun SessionContent(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .semantics(mergeDescendants = true) {
+                        contentDescription = "Step ${currentStep.stepOrder} of ${currentStep.totalStepsInTechnique}, ${currentStep.techniqueName}"
+                    }
             ) {
                 Text(
                     "Step ${currentStep.stepOrder} of ${currentStep.totalStepsInTechnique}",
@@ -279,7 +285,13 @@ private fun CountdownRing(secondsRemaining: Int, totalSeconds: Int, isPreparing:
     val arcColor = if (isPreparing) secondary else primary
     val glowColor = if (isPreparing) secondary else primary
 
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(152.dp)) {
+    val label = if (isPreparing) "$secondsRemaining seconds to get ready" else "$secondsRemaining seconds remaining"
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(152.dp)
+            .semantics { contentDescription = label }
+    ) {
         // Outer glow
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawCircle(

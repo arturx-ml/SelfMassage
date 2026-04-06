@@ -29,7 +29,7 @@ data class SessionUiState(
 
 @HiltViewModel
 class SessionViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     getSessionSteps: GetSessionStepsUseCase
 ) : ViewModel() {
 
@@ -46,9 +46,10 @@ class SessionViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(
         SessionUiState(
             steps = steps,
-            currentIndex = 0,
-            secondsRemaining = steps.firstOrNull()?.durationSeconds ?: 0,
-            prepSecondsRemaining = PREP_SECONDS,
+            currentIndex = savedStateHandle["currentIndex"] ?: 0,
+            secondsRemaining = savedStateHandle["secondsRemaining"]
+                ?: steps.firstOrNull()?.durationSeconds ?: 0,
+            prepSecondsRemaining = savedStateHandle["prepSecondsRemaining"] ?: PREP_SECONDS,
             isPlaying = false,
             isFinished = false
         )
@@ -59,14 +60,14 @@ class SessionViewModel @Inject constructor(
 
     fun play() {
         if (_uiState.value.isFinished) return
-        _uiState.value = _uiState.value.copy(isPlaying = true)
+        updateState(_uiState.value.copy(isPlaying = true))
         startTicking()
     }
 
     fun pause() {
         timerJob?.cancel()
         timerJob = null
-        _uiState.value = _uiState.value.copy(isPlaying = false)
+        updateState(_uiState.value.copy(isPlaying = false))
     }
 
     fun skipNext() {
@@ -83,17 +84,18 @@ class SessionViewModel @Inject constructor(
         val current = _uiState.value
         if (current.currentIndex > 0) {
             val newIndex = current.currentIndex - 1
-            _uiState.value = current.copy(
+            updateState(current.copy(
                 currentIndex = newIndex,
                 secondsRemaining = steps[newIndex].durationSeconds,
                 prepSecondsRemaining = PREP_SECONDS,
                 isPlaying = wasPlaying
-            )
+            ))
             if (wasPlaying) startTicking()
         }
     }
 
     private fun startTicking() {
+        timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while (true) {
                 delay(1_000)
@@ -101,10 +103,10 @@ class SessionViewModel @Inject constructor(
                 if (!current.isPlaying) break
                 when {
                     current.prepSecondsRemaining > 0 -> {
-                        _uiState.value = current.copy(prepSecondsRemaining = current.prepSecondsRemaining - 1)
+                        updateState(current.copy(prepSecondsRemaining = current.prepSecondsRemaining - 1))
                     }
                     current.secondsRemaining > 1 -> {
-                        _uiState.value = current.copy(secondsRemaining = current.secondsRemaining - 1)
+                        updateState(current.copy(secondsRemaining = current.secondsRemaining - 1))
                     }
                     else -> {
                         advanceStep(wasPlaying = true)
@@ -119,15 +121,22 @@ class SessionViewModel @Inject constructor(
         val current = _uiState.value
         val nextIndex = current.currentIndex + 1
         if (nextIndex >= steps.size) {
-            _uiState.value = current.copy(isPlaying = false, isFinished = true)
+            updateState(current.copy(isPlaying = false, isFinished = true))
         } else {
-            _uiState.value = current.copy(
+            updateState(current.copy(
                 currentIndex = nextIndex,
                 secondsRemaining = steps[nextIndex].durationSeconds,
                 prepSecondsRemaining = PREP_SECONDS,
                 isPlaying = wasPlaying
-            )
+            ))
             if (wasPlaying) startTicking()
         }
+    }
+
+    private fun updateState(newState: SessionUiState) {
+        _uiState.value = newState
+        savedStateHandle["currentIndex"] = newState.currentIndex
+        savedStateHandle["secondsRemaining"] = newState.secondsRemaining
+        savedStateHandle["prepSecondsRemaining"] = newState.prepSecondsRemaining
     }
 }

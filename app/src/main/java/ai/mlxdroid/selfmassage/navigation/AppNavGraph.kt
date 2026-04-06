@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
+import androidx.navigation.navDeepLink
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -71,7 +72,9 @@ fun AppNavGraph() {
                 )
             }
 
-            composable<MassageDetail> {
+            composable<MassageDetail>(
+                deepLinks = listOf(navDeepLink { uriPattern = "selfmassage://technique/{zoneId}/{techniqueId}" })
+            ) {
                 MassageDetailScreen(
                     onBack = { navController.popBackStack() },
                     onStartSession = { techniqueId ->
@@ -86,7 +89,9 @@ fun AppNavGraph() {
                 })
             }
 
-            composable<RoutineDetail> {
+            composable<RoutineDetail>(
+                deepLinks = listOf(navDeepLink { uriPattern = "selfmassage://routine/{routineId}" })
+            ) {
                 RoutineDetailScreen(
                     onBack = { navController.popBackStack() },
                     onStartRoutine = { routineId ->

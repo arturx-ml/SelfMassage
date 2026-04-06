@@ -41,8 +41,8 @@ import ai.mlxdroid.selfmassage.ui.components.AccentChip
 import ai.mlxdroid.selfmassage.ui.components.EmptyPlaceholder
 import ai.mlxdroid.selfmassage.ui.components.GradientHeader
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
+import ai.mlxdroid.selfmassage.ui.util.timeOfDayGreeting
 import ai.mlxdroid.selfmassage.ui.viewmodel.RoutineListViewModel
-import java.util.Calendar
 
 @Composable
 fun RoutineListScreen(
@@ -58,15 +58,8 @@ fun RoutineListContent(
     routines: List<Routine>,
     onRoutineClick: (Routine) -> Unit
 ) {
-    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    val greeting = when {
-        hour < 12 -> "Good morning"
-        hour < 18 -> "Good afternoon"
-        else -> "Good evening"
-    }
-
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        GradientHeader(title = greeting, subtitle = "Start a guided routine")
+        GradientHeader(title = timeOfDayGreeting(), subtitle = "Start a guided routine")
 
         if (routines.isEmpty()) {
             EmptyPlaceholder("No routines available")

@@ -4,10 +4,10 @@ import ai.mlxdroid.selfmassage.data.MassageRepositoryInterface
 import ai.mlxdroid.selfmassage.data.model.SessionStep
 import javax.inject.Inject
 
-class GetSessionStepsUseCase @Inject constructor(private val repo: MassageRepositoryInterface) {
+class GetSessionStepsUseCase @Inject constructor(private val repository: MassageRepositoryInterface) {
 
     fun forTechnique(techniqueId: String): List<SessionStep> {
-        val technique = repo.techniqueById(techniqueId) ?: return emptyList()
+        val technique = repository.techniqueById(techniqueId) ?: return emptyList()
         return technique.steps.map { step ->
             SessionStep(
                 techniqueName = technique.name,
@@ -22,7 +22,7 @@ class GetSessionStepsUseCase @Inject constructor(private val repo: MassageReposi
     }
 
     fun forRoutine(routineId: String): List<SessionStep> {
-        val routine = repo.routineById(routineId) ?: return emptyList()
+        val routine = repository.routineById(routineId) ?: return emptyList()
         return routine.techniqueIds.flatMap { forTechnique(it) }
     }
 }

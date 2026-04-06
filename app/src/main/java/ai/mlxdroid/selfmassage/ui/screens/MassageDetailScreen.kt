@@ -103,13 +103,12 @@ fun MassageDetailContent(
                 modifier = Modifier.weight(1f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
-            Box(
-                contentAlignment = Alignment.Center,
+            IconButton(
+                onClick = { onStartSession(technique.id) },
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primary)
-                    .clickable { onStartSession(technique.id) }
             ) {
                 Icon(
                     Icons.Outlined.PlayCircle,
