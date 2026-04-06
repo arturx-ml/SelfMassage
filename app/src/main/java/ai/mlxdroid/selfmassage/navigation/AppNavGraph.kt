@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -44,12 +45,10 @@ import ai.mlxdroid.selfmassage.ui.screens.ZoneListScreen
 fun AppNavGraph() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = backStackEntry?.destination?.route
+    val destination = backStackEntry?.destination
 
-    val isOnTabRoot = listOf(
-        ZoneList::class.qualifiedName,
-        RoutineList::class.qualifiedName
-    ).any { currentRoute?.startsWith(it ?: "") == true }
+    val isOnTabRoot = destination?.hasRoute<ZoneList>() == true ||
+        destination?.hasRoute<RoutineList>() == true
 
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
@@ -108,7 +107,7 @@ fun AppNavGraph() {
         // Floating tab bar
         if (isOnTabRoot) {
             FloatingTabBar(
-                selectedTab = if (currentRoute?.startsWith(RoutineList::class.qualifiedName ?: "") == true) 0 else 1,
+                selectedTab = if (destination?.hasRoute<RoutineList>() == true) 0 else 1,
                 onTabSelected = { tab ->
                     val dest = if (tab == 0) RoutineList else ZoneList
                     navController.navigate(dest) {
@@ -138,7 +137,7 @@ private fun FloatingTabBar(
             .fillMaxWidth()
             .shadow(6.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.10f))
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         TabItem(

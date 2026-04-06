@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,9 +32,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 import ai.mlxdroid.selfmassage.ui.components.AccentChip
+import ai.mlxdroid.selfmassage.ui.components.EmptyPlaceholder
 import ai.mlxdroid.selfmassage.ui.components.ErrorPlaceholder
 import ai.mlxdroid.selfmassage.ui.components.GradientHeader
 import ai.mlxdroid.selfmassage.ui.theme.PrimaryLight
@@ -46,9 +49,9 @@ fun MassageListScreen(
     onBack: () -> Unit,
     viewModel: MassageListViewModel = hiltViewModel()
 ) {
-    val state = viewModel.uiState
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     if (state.error != null) {
-        ErrorPlaceholder(message = state.error, onBack = onBack)
+        ErrorPlaceholder(message = state.error!!, onBack = onBack)
     } else {
         MassageListContent(
             zoneName = state.zone?.name ?: "",
@@ -73,16 +76,20 @@ fun MassageListContent(
             onBack = onBack
         )
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(top = 4.dp, bottom = 80.dp)
-        ) {
-            items(techniques, key = { it.id }) { technique ->
-                TechniqueCard(
-                    technique = technique,
-                    onClick = { onTechniqueClick(technique.id) }
-                )
+        if (techniques.isEmpty()) {
+            EmptyPlaceholder("No techniques available")
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(top = 4.dp, bottom = 80.dp)
+            ) {
+                items(techniques, key = { it.id }) { technique ->
+                    TechniqueCard(
+                        technique = technique,
+                        onClick = { onTechniqueClick(technique.id) }
+                    )
+                }
             }
         }
     }
@@ -97,7 +104,7 @@ private fun TechniqueCard(technique: MassageTechnique, onClick: () -> Unit) {
             .height(72.dp)
             .shadow(6.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.10f))
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp)
     ) {
@@ -147,6 +154,19 @@ private fun MassageListContentPreview() {
         MassageListContent(
             zoneName = "Neck",
             techniques = MassageRepository.techniquesForZone("neck"),
+            onTechniqueClick = {},
+            onBack = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MassageListEmptyPreview() {
+    SelfMassageTheme {
+        MassageListContent(
+            zoneName = "Neck",
+            techniques = emptyList(),
             onTechniqueClick = {},
             onBack = {}
         )

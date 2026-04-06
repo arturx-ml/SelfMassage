@@ -15,19 +15,19 @@ class ZoneListViewModelTest {
     @Test
     fun zones_exposesAllZonesFromRepo() {
         val vm = viewModel()
-        assertEquals(3, vm.zones.size)
+        assertEquals(3, vm.zones.value.size)
     }
 
     @Test
     fun zones_firstItemMatchesFirstRepoZone() {
         val vm = viewModel()
-        assertEquals("neck", vm.zones.first().id)
+        assertEquals("neck", vm.zones.value.first().id)
     }
 
     @Test
     fun zones_emptyRepo_exposesEmptyList() {
         val vm = viewModel(FakeMassageRepository(zones = emptyList()))
-        assertTrue(vm.zones.isEmpty())
+        assertTrue(vm.zones.value.isEmpty())
     }
 
     @Test
@@ -36,7 +36,7 @@ class ZoneListViewModelTest {
             BodyZone("test", "Test Zone", "icon", emptyList())
         )
         val vm = viewModel(FakeMassageRepository(zones = customZones))
-        assertEquals(1, vm.zones.size)
-        assertEquals("test", vm.zones.first().id)
+        assertEquals(1, vm.zones.value.size)
+        assertEquals("test", vm.zones.value.first().id)
     }
 }

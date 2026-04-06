@@ -96,7 +96,7 @@ fun SessionContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -325,7 +325,7 @@ private fun SessionCompleteOverlay(onDone: () -> Unit) {
             modifier = Modifier
                 .padding(24.dp)
                 .clip(RoundedCornerShape(28.dp))
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(32.dp)
         ) {
             // Checkmark circle

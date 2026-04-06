@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -33,9 +34,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.Routine
 import ai.mlxdroid.selfmassage.ui.components.AccentChip
+import ai.mlxdroid.selfmassage.ui.components.EmptyPlaceholder
 import ai.mlxdroid.selfmassage.ui.components.GradientHeader
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
 import ai.mlxdroid.selfmassage.ui.viewmodel.RoutineListViewModel
@@ -46,7 +49,8 @@ fun RoutineListScreen(
     onRoutineClick: (Routine) -> Unit,
     viewModel: RoutineListViewModel = hiltViewModel()
 ) {
-    RoutineListContent(routines = viewModel.routines, onRoutineClick = onRoutineClick)
+    val routines by viewModel.routines.collectAsStateWithLifecycle()
+    RoutineListContent(routines = routines, onRoutineClick = onRoutineClick)
 }
 
 @Composable
@@ -64,13 +68,17 @@ fun RoutineListContent(
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         GradientHeader(title = greeting, subtitle = "Start a guided routine")
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(top = 4.dp, bottom = 80.dp)
-        ) {
-            items(routines, key = { it.id }) { routine ->
-                RoutineCard(routine = routine, onClick = { onRoutineClick(routine) })
+        if (routines.isEmpty()) {
+            EmptyPlaceholder("No routines available")
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(top = 4.dp, bottom = 80.dp)
+            ) {
+                items(routines, key = { it.id }) { routine ->
+                    RoutineCard(routine = routine, onClick = { onRoutineClick(routine) })
+                }
             }
         }
     }
@@ -83,7 +91,7 @@ private fun RoutineCard(routine: Routine, onClick: () -> Unit) {
             .fillMaxWidth()
             .shadow(6.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.10f))
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
             .padding(20.dp)
     ) {
@@ -143,5 +151,13 @@ private fun RoutineCard(routine: Routine, onClick: () -> Unit) {
 private fun RoutineListContentPreview() {
     SelfMassageTheme {
         RoutineListContent(routines = MassageRepository.routines, onRoutineClick = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RoutineListEmptyPreview() {
+    SelfMassageTheme {
+        RoutineListContent(routines = emptyList(), onRoutineClick = {})
     }
 }

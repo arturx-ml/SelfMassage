@@ -33,7 +33,7 @@ fun GradientHeader(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(Brush.verticalGradient(listOf(GradientStart, Color.White)))
+            .background(Brush.verticalGradient(listOf(GradientStart, MaterialTheme.colorScheme.surface)))
             .padding(start = 16.dp, end = 16.dp, top = 48.dp, bottom = 32.dp)
     ) {
         if (onBack != null) {

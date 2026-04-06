@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,8 +35,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.BodyZone
+import ai.mlxdroid.selfmassage.ui.components.EmptyPlaceholder
 import ai.mlxdroid.selfmassage.ui.components.GradientHeader
 import ai.mlxdroid.selfmassage.ui.theme.PrimaryLight
 import ai.mlxdroid.selfmassage.ui.theme.SelfMassageTheme
@@ -47,7 +50,8 @@ fun ZoneListScreen(
     onZoneClick: (BodyZone) -> Unit,
     viewModel: ZoneListViewModel = hiltViewModel()
 ) {
-    ZoneListContent(zones = viewModel.zones, onZoneClick = onZoneClick)
+    val zones by viewModel.zones.collectAsStateWithLifecycle()
+    ZoneListContent(zones = zones, onZoneClick = onZoneClick)
 }
 
 @Composable
@@ -65,15 +69,19 @@ fun ZoneListContent(
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         GradientHeader(title = greeting, subtitle = "Choose a zone to begin your session")
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 4.dp, bottom = 80.dp)
-        ) {
-            items(zones, key = { it.id }) { zone ->
-                ZoneCard(zone = zone, onClick = { onZoneClick(zone) })
+        if (zones.isEmpty()) {
+            EmptyPlaceholder("No zones available")
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 4.dp, bottom = 80.dp)
+            ) {
+                items(zones, key = { it.id }) { zone ->
+                    ZoneCard(zone = zone, onClick = { onZoneClick(zone) })
+                }
             }
         }
     }
@@ -87,7 +95,7 @@ private fun ZoneCard(zone: BodyZone, onClick: () -> Unit) {
             .height(88.dp)
             .shadow(elevation = 6.dp, shape = RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.10f))
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
     ) {
         // Left accent bar
@@ -155,5 +163,13 @@ fun zoneIcon(iconName: String): ImageVector = when (iconName) {
 private fun ZoneListContentPreview() {
     SelfMassageTheme {
         ZoneListContent(zones = MassageRepository.zones, onZoneClick = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ZoneListEmptyPreview() {
+    SelfMassageTheme {
+        ZoneListContent(zones = emptyList(), onZoneClick = {})
     }
 }

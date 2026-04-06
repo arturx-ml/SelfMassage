@@ -21,15 +21,15 @@ class MassageListViewModelTest {
     @Test
     fun uiState_knownZoneId_exposesCorrectZoneAndTechniques() {
         val vm = viewModel("neck")
-        assertEquals("Neck", vm.uiState.zone?.name)
-        assertEquals(3, vm.uiState.techniques.size)
+        assertEquals("Neck", vm.uiState.value.zone?.name)
+        assertEquals(3, vm.uiState.value.techniques.size)
     }
 
     @Test
     fun uiState_unknownZoneId_exposesNullZoneAndEmptyTechniques() {
         val vm = viewModel("invalid")
-        assertNull(vm.uiState.zone)
-        assertTrue(vm.uiState.techniques.isEmpty())
+        assertNull(vm.uiState.value.zone)
+        assertTrue(vm.uiState.value.techniques.isEmpty())
     }
 
     @Test
@@ -41,13 +41,13 @@ class MassageListViewModelTest {
     @Test
     fun uiState_arms_exposesTwoTechniques() {
         val vm = viewModel("arms")
-        assertEquals(2, vm.uiState.techniques.size)
+        assertEquals(2, vm.uiState.value.techniques.size)
     }
 
     @Test
     fun uiState_shoulders_exposesThreeTechniques() {
         val vm = viewModel("shoulders")
-        assertEquals(3, vm.uiState.techniques.size)
-        assertEquals("Shoulders", vm.uiState.zone?.name)
+        assertEquals(3, vm.uiState.value.techniques.size)
+        assertEquals("Shoulders", vm.uiState.value.zone?.name)
     }
 }

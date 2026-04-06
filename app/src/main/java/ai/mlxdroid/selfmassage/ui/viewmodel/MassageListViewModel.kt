@@ -6,6 +6,9 @@ import ai.mlxdroid.selfmassage.data.model.BodyZone
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 import ai.mlxdroid.selfmassage.domain.GetTechniquesForZoneUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 data class MassageListUiState(
@@ -22,10 +25,13 @@ class MassageListViewModel @Inject constructor(
 
     val zoneId: String = savedStateHandle["zoneId"] ?: ""
 
-    val uiState: MassageListUiState = if (zoneId.isNotEmpty()) {
-        val (zone, techniques) = getTechniquesForZone(zoneId)
-        MassageListUiState(zone = zone, techniques = techniques)
-    } else {
-        MassageListUiState(error = "Zone not found")
-    }
+    private val _uiState = MutableStateFlow(
+        if (zoneId.isNotEmpty()) {
+            val (zone, techniques) = getTechniquesForZone(zoneId)
+            MassageListUiState(zone = zone, techniques = techniques)
+        } else {
+            MassageListUiState(error = "Zone not found")
+        }
+    )
+    val uiState: StateFlow<MassageListUiState> = _uiState.asStateFlow()
 }

@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +31,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 import ai.mlxdroid.selfmassage.data.model.Routine
@@ -45,13 +47,16 @@ fun RoutineDetailScreen(
     onStartRoutine: (routineId: String) -> Unit,
     viewModel: RoutineDetailViewModel = hiltViewModel()
 ) {
+    val routine by viewModel.routine.collectAsStateWithLifecycle()
+    val techniques by viewModel.techniques.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
     when {
-        viewModel.error != null -> ErrorPlaceholder(message = viewModel.error!!, onBack = onBack)
-        viewModel.routine != null -> RoutineDetailContent(
-            routine = viewModel.routine!!,
-            techniques = viewModel.techniques,
+        error != null -> ErrorPlaceholder(message = error!!, onBack = onBack)
+        routine != null -> RoutineDetailContent(
+            routine = routine!!,
+            techniques = techniques,
             onBack = onBack,
-            onStartRoutine = { onStartRoutine(viewModel.routine!!.id) }
+            onStartRoutine = { onStartRoutine(routine!!.id) }
         )
     }
 }
