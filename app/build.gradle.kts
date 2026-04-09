@@ -24,6 +24,22 @@ android {
         testInstrumentationRunner = "dagger.hilt.android.testing.HiltTestRunner"
     }
 
+    flavorDimensions += "tier"
+    productFlavors {
+        create("free") {
+            dimension = "tier"
+            applicationIdSuffix = ".free"
+            versionNameSuffix = "-free"
+            buildConfigField("String", "FLAVOR_TIER", "\"free\"")
+        }
+        create("paid") {
+            dimension = "tier"
+            applicationIdSuffix = ".paid"
+            versionNameSuffix = "-paid"
+            buildConfigField("String", "FLAVOR_TIER", "\"paid\"")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -40,6 +56,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -76,11 +93,11 @@ dependencies {
 tasks.register("unitTests") {
     description = "Runs all unit tests for the project."
     group = "verification"
-    dependsOn("testDebugUnitTest")
+    dependsOn("testFreeDebugUnitTest")
 }
 
 afterEvaluate {
-    tasks.named<Test>("testDebugUnitTest") {
+    tasks.named<Test>("testFreeDebugUnitTest") {
         outputs.upToDateWhen { false }
         testLogging {
             events("passed", "failed", "skipped")

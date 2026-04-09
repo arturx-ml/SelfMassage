@@ -41,7 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ai.mlxdroid.selfmassage.data.MassageRepository
+import ai.mlxdroid.selfmassage.data.model.AnimationType
+import ai.mlxdroid.selfmassage.data.model.BodyLocation
 import ai.mlxdroid.selfmassage.data.model.MassageStep
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 import ai.mlxdroid.selfmassage.ui.components.AccentChip
@@ -243,7 +244,20 @@ private fun StepRow(step: MassageStep, isLast: Boolean) {
 private fun MassageDetailContentPreview() {
     SelfMassageTheme {
         MassageDetailContent(
-            technique = MassageRepository.techniqueById("neck_suboccipital")!!,
+            technique = MassageTechnique(
+                id = "neck_suboccipital",
+                name = "Suboccipital Release",
+                summary = "Releases tension at the base of the skull",
+                durationMinutes = 3,
+                animationType = AnimationType.PRESSURE_PULSE,
+                bodyLocation = BodyLocation.BASE_OF_SKULL,
+                steps = listOf(
+                    MassageStep(1, "Place fingertips at the base of your skull.", 30),
+                    MassageStep(2, "Apply gentle upward pressure.", 30),
+                    MassageStep(3, "Tilt head back slightly. Hold.", 60),
+                    MassageStep(4, "Tilt forward to release. Repeat 3 times.", 30)
+                )
+            ),
             onBack = {}
         )
     }

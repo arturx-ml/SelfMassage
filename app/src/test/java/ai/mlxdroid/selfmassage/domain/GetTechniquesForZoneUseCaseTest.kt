@@ -14,9 +14,9 @@ import org.junit.Test
 class GetTechniquesForZoneUseCaseTest {
 
     private val sampleTechnique = MassageTechnique(
-        id = "neck_suboccipital",
-        name = "Suboccipital Release",
-        summary = "Releases tension at the base of the skull",
+        id = "sample",
+        name = "Sample",
+        summary = "Sample technique",
         durationMinutes = 3,
         steps = emptyList(),
         animationType = AnimationType.PRESSURE_PULSE,
@@ -26,10 +26,10 @@ class GetTechniquesForZoneUseCaseTest {
     @Test
     fun invoke_knownZoneId_returnsPairWithZoneAndTechniques() {
         val repo = FakeMassageRepository()
-        val (zone, techniques) = GetTechniquesForZoneUseCase(repo)("neck")
+        val (zone, techniques) = GetTechniquesForZoneUseCase(repo)("test_zone_1")
         assertNotNull(zone)
-        assertEquals("neck", zone?.id)
-        assertEquals(3, techniques.size)
+        assertEquals("test_zone_1", zone?.id)
+        assertEquals(2, techniques.size)
     }
 
     @Test
@@ -55,10 +55,8 @@ class GetTechniquesForZoneUseCaseTest {
     @Test
     fun invoke_preservesTechniqueOrder() {
         val repo = FakeMassageRepository()
-        val (_, techniques) = GetTechniquesForZoneUseCase(repo)("shoulders")
-        assertEquals("shoulder_cross_friction", techniques[0].id)
-        assertEquals("shoulder_blade_squeeze", techniques[1].id)
-        assertEquals("shoulder_deltoid_strip", techniques[2].id)
+        val (_, techniques) = GetTechniquesForZoneUseCase(repo)("test_zone_1")
+        assertEquals("test_technique_1", techniques[0].id)
+        assertEquals("test_technique_2", techniques[1].id)
     }
 }
-

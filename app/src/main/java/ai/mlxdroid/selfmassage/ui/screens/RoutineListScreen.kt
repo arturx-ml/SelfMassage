@@ -35,7 +35,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.Routine
 import ai.mlxdroid.selfmassage.ui.components.AccentChip
 import ai.mlxdroid.selfmassage.ui.components.EmptyPlaceholder
@@ -143,7 +142,13 @@ private fun RoutineCard(routine: Routine, onClick: () -> Unit) {
 @Composable
 private fun RoutineListContentPreview() {
     SelfMassageTheme {
-        RoutineListContent(routines = MassageRepository.routines, onRoutineClick = {})
+        RoutineListContent(
+            routines = listOf(
+                Routine("r1", "Morning Neck Reset", "Eases overnight stiffness.", "SelfImprovement", 7, listOf("t1", "t2")),
+                Routine("r2", "Office Tension Relief", "Targets desk-work tension.", "FitnessCenter", 11, listOf("t3", "t4"))
+            ),
+            onRoutineClick = {}
+        )
     }
 }
 

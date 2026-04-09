@@ -567,6 +567,18 @@ private fun DrawScope.drawBodyLocator(
         BodyLocation.HAND_WEB -> drawArmLocator(
             bodyLocation, cx, top, panelH, outlineColor, spotColor, pulse
         )
+
+        BodyLocation.LUMBAR_SPINE,
+        BodyLocation.LATERAL_LOWER_BACK,
+        BodyLocation.SACRUM -> drawLowerBackLocator(
+            bodyLocation, cx, top, panelH, outlineColor, spotColor, pulse
+        )
+
+        BodyLocation.IT_BAND,
+        BodyLocation.CALF,
+        BodyLocation.PLANTAR_FOOT -> drawLegLocator(
+            bodyLocation, cx, top, panelH, outlineColor, spotColor, pulse
+        )
     }
 }
 
@@ -759,6 +771,132 @@ private fun DrawScope.drawArmLocator(
     val spot = when (location) {
         BodyLocation.FOREARM -> Offset(cx, (elbowY + wristY) / 2f)
         else                 -> Offset(cx + wristHW + 5.dp.toPx(), wristY + 10.dp.toPx()) // HAND_WEB
+    }
+    drawCircle(color = spotColor.copy(alpha = 0.20f + 0.20f * pulse), radius = 9.dp.toPx(), center = spot)
+    drawCircle(color = spotColor, radius = 4.dp.toPx(), center = spot)
+}
+
+// Lower back close-up: torso rear view with waistline, spine hint, sacrum triangle
+private fun DrawScope.drawLowerBackLocator(
+    location: BodyLocation,
+    cx: Float, panelTop: Float, panelH: Float,
+    outlineColor: Color, spotColor: Color, pulse: Float
+) {
+    val figTop   = panelTop + 8.dp.toPx()
+    val figBot   = panelTop + panelH - 8.dp.toPx()
+    val torsoHW  = 28.dp.toPx()
+    val waistHW  = 22.dp.toPx()
+    val hipHW    = 26.dp.toPx()
+    val midY     = (figTop + figBot) / 2f
+
+    // Torso outline (trapezoid: wider shoulders → narrow waist → wider hips)
+    val bodyPath = Path().apply {
+        moveTo(cx - torsoHW, figTop)
+        lineTo(cx + torsoHW, figTop)
+        cubicTo(cx + torsoHW - 2.dp.toPx(), midY - 8.dp.toPx(),
+                cx + waistHW + 2.dp.toPx(), midY - 4.dp.toPx(),
+                cx + waistHW, midY)
+        cubicTo(cx + waistHW + 2.dp.toPx(), midY + 8.dp.toPx(),
+                cx + hipHW - 2.dp.toPx(), figBot - 8.dp.toPx(),
+                cx + hipHW, figBot)
+        lineTo(cx - hipHW, figBot)
+        cubicTo(cx - hipHW + 2.dp.toPx(), figBot - 8.dp.toPx(),
+                cx - waistHW - 2.dp.toPx(), midY + 8.dp.toPx(),
+                cx - waistHW, midY)
+        cubicTo(cx - waistHW - 2.dp.toPx(), midY - 4.dp.toPx(),
+                cx - torsoHW + 2.dp.toPx(), midY - 8.dp.toPx(),
+                cx - torsoHW, figTop)
+        close()
+    }
+
+    drawPath(bodyPath, color = outlineColor.copy(alpha = 0.14f))
+    drawPath(bodyPath, color = outlineColor.copy(alpha = 0.60f),
+        style = Stroke(width = 1.5.dp.toPx(), join = StrokeJoin.Round, cap = StrokeCap.Round))
+
+    // Spine line (dashed hint)
+    val spineTop = figTop + 4.dp.toPx()
+    val spineBot = figBot - 6.dp.toPx()
+    for (y in generateSequence(spineTop) { it + 6.dp.toPx() }.takeWhile { it < spineBot }) {
+        drawLine(
+            color = outlineColor.copy(alpha = 0.30f),
+            start = Offset(cx, y),
+            end = Offset(cx, (y + 3.dp.toPx()).coerceAtMost(spineBot)),
+            strokeWidth = 1.dp.toPx(), cap = StrokeCap.Round
+        )
+    }
+
+    // Pulsing spot
+    val spot = when (location) {
+        BodyLocation.LUMBAR_SPINE      -> Offset(cx, midY - 4.dp.toPx())
+        BodyLocation.LATERAL_LOWER_BACK -> Offset(cx + waistHW - 6.dp.toPx(), midY)
+        else                            -> Offset(cx, figBot - 12.dp.toPx()) // SACRUM
+    }
+    drawCircle(color = spotColor.copy(alpha = 0.20f + 0.20f * pulse), radius = 9.dp.toPx(), center = spot)
+    drawCircle(color = spotColor, radius = 4.dp.toPx(), center = spot)
+}
+
+// Leg close-up: thigh tapering to knee, calf tapering to ankle, foot stub
+private fun DrawScope.drawLegLocator(
+    location: BodyLocation,
+    cx: Float, panelTop: Float, panelH: Float,
+    outlineColor: Color, spotColor: Color, pulse: Float
+) {
+    val hipY     = panelTop + 8.dp.toPx()
+    val kneeY    = panelTop + 42.dp.toPx()
+    val ankleY   = panelTop + 78.dp.toPx()
+    val footBotY = panelTop + panelH - 6.dp.toPx()
+    val thighHW  = 14.dp.toPx()
+    val kneeHW   = 10.dp.toPx()
+    val calfHW   = 10.dp.toPx()
+    val ankleHW  = 6.dp.toPx()
+    val footLen  = 18.dp.toPx()
+
+    // Leg path (single continuous outline)
+    val legPath = Path().apply {
+        moveTo(cx - thighHW, hipY)
+        // Outer thigh down to knee
+        cubicTo(cx - thighHW - 1.dp.toPx(), hipY + 10.dp.toPx(),
+                cx - kneeHW - 2.dp.toPx(), kneeY - 8.dp.toPx(),
+                cx - kneeHW, kneeY)
+        // Outer calf down to ankle
+        cubicTo(cx - calfHW - 1.dp.toPx(), kneeY + 10.dp.toPx(),
+                cx - ankleHW - 1.dp.toPx(), ankleY - 8.dp.toPx(),
+                cx - ankleHW, ankleY)
+        // Foot (left side down, across bottom, back up right)
+        lineTo(cx - ankleHW, footBotY - 4.dp.toPx())
+        cubicTo(cx - ankleHW - 2.dp.toPx(), footBotY,
+                cx + footLen - 4.dp.toPx(), footBotY,
+                cx + footLen, footBotY - 6.dp.toPx())
+        // Back up right ankle
+        lineTo(cx + ankleHW, ankleY)
+        // Inner calf up to knee
+        cubicTo(cx + ankleHW + 1.dp.toPx(), ankleY - 8.dp.toPx(),
+                cx + calfHW + 1.dp.toPx(), kneeY + 10.dp.toPx(),
+                cx + kneeHW, kneeY)
+        // Inner thigh up to hip
+        cubicTo(cx + kneeHW + 2.dp.toPx(), kneeY - 8.dp.toPx(),
+                cx + thighHW + 1.dp.toPx(), hipY + 10.dp.toPx(),
+                cx + thighHW, hipY)
+        close()
+    }
+
+    drawPath(legPath, color = outlineColor.copy(alpha = 0.14f))
+    drawPath(legPath, color = outlineColor.copy(alpha = 0.60f),
+        style = Stroke(width = 1.5.dp.toPx(), join = StrokeJoin.Round, cap = StrokeCap.Round))
+
+    // Kneecap hint
+    drawOval(
+        color = outlineColor.copy(alpha = 0.25f),
+        topLeft = Offset(cx - 5.dp.toPx(), kneeY - 4.dp.toPx()),
+        size = Size(10.dp.toPx(), 8.dp.toPx()),
+        style = Stroke(width = 1.dp.toPx())
+    )
+
+    // Pulsing spot
+    val spot = when (location) {
+        BodyLocation.IT_BAND      -> Offset(cx - thighHW + 2.dp.toPx(), (hipY + kneeY) / 2f)
+        BodyLocation.CALF         -> Offset(cx, (kneeY + ankleY) / 2f)
+        else                      -> Offset(cx + 2.dp.toPx(), footBotY - 10.dp.toPx()) // PLANTAR_FOOT
     }
     drawCircle(color = spotColor.copy(alpha = 0.20f + 0.20f * pulse), radius = 9.dp.toPx(), center = spot)
     drawCircle(color = spotColor, radius = 4.dp.toPx(), center = spot)

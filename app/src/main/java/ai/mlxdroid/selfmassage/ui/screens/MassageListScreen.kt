@@ -33,7 +33,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ai.mlxdroid.selfmassage.data.MassageRepository
+import ai.mlxdroid.selfmassage.data.model.AnimationType
+import ai.mlxdroid.selfmassage.data.model.BodyLocation
+import ai.mlxdroid.selfmassage.data.model.MassageStep
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 import ai.mlxdroid.selfmassage.ui.components.AccentChip
 import ai.mlxdroid.selfmassage.ui.components.EmptyPlaceholder
@@ -153,7 +155,10 @@ private fun MassageListContentPreview() {
     SelfMassageTheme {
         MassageListContent(
             zoneName = "Neck",
-            techniques = MassageRepository.techniquesForZone("neck"),
+            techniques = listOf(
+                MassageTechnique("t1", "Suboccipital Release", "Releases tension at the base of the skull", 3, listOf(MassageStep(1, "Step one", 60)), AnimationType.PRESSURE_PULSE, BodyLocation.BASE_OF_SKULL),
+                MassageTechnique("t2", "Lateral Neck Stretch", "Targets SCM and scalenes", 3, listOf(MassageStep(1, "Step one", 60)), AnimationType.VERTICAL_STROKE, BodyLocation.LATERAL_NECK)
+            ),
             onTechniqueClick = {},
             onBack = {}
         )

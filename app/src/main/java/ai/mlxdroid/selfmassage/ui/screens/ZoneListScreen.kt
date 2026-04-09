@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
+import androidx.compose.material.icons.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.SelfImprovement
 import androidx.compose.material.icons.outlined.Straighten
@@ -36,7 +37,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ai.mlxdroid.selfmassage.data.MassageRepository
 import ai.mlxdroid.selfmassage.data.model.BodyZone
 import ai.mlxdroid.selfmassage.ui.components.EmptyPlaceholder
 import ai.mlxdroid.selfmassage.ui.components.GradientHeader
@@ -148,6 +148,7 @@ private fun ZoneCard(zone: BodyZone, onClick: () -> Unit) {
 fun zoneIcon(iconName: String): ImageVector = when (iconName) {
     "FitnessCenter" -> Icons.Outlined.FitnessCenter
     "Straighten" -> Icons.Outlined.Straighten
+    "DirectionsWalk" -> Icons.Outlined.DirectionsWalk
     else -> Icons.Outlined.SelfImprovement
 }
 
@@ -155,7 +156,14 @@ fun zoneIcon(iconName: String): ImageVector = when (iconName) {
 @Composable
 private fun ZoneListContentPreview() {
     SelfMassageTheme {
-        ZoneListContent(zones = MassageRepository.zones, onZoneClick = {})
+        ZoneListContent(
+            zones = listOf(
+                BodyZone("neck", "Neck", "SelfImprovement", listOf("t1", "t2")),
+                BodyZone("shoulders", "Shoulders", "FitnessCenter", listOf("t3")),
+                BodyZone("arms", "Arms", "Straighten", listOf("t4"))
+            ),
+            onZoneClick = {}
+        )
     }
 }
 

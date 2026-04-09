@@ -12,9 +12,9 @@ class GetTechniqueDetailUseCaseTest {
 
     @Test
     fun invoke_knownId_returnsTechnique() {
-        val result = useCase("neck_suboccipital")
+        val result = useCase("test_technique_1")
         assertNotNull(result)
-        assertEquals("Suboccipital Release", result?.name)
+        assertEquals("Test Technique One", result?.name)
     }
 
     @Test
@@ -23,7 +23,7 @@ class GetTechniqueDetailUseCaseTest {
     }
 
     @Test
-    fun invoke_eachRealTechniqueId_resolvesSuccessfully() {
+    fun invoke_eachDefaultTechniqueId_resolvesSuccessfully() {
         val repo = FakeMassageRepository()
         val uc = GetTechniqueDetailUseCase(repo)
         repo.techniques.forEach { technique ->

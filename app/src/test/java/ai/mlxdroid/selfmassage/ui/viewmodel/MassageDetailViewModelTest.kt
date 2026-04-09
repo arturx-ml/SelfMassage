@@ -12,7 +12,7 @@ import org.junit.Test
 class MassageDetailViewModelTest {
 
     private fun viewModel(
-        zoneId: String = "neck",
+        zoneId: String = "test_zone_1",
         techniqueId: String,
         repo: FakeMassageRepository = FakeMassageRepository()
     ) = MassageDetailViewModel(
@@ -22,9 +22,9 @@ class MassageDetailViewModelTest {
 
     @Test
     fun technique_knownId_exposesCorrectTechnique() {
-        val vm = viewModel(techniqueId = "neck_suboccipital")
+        val vm = viewModel(techniqueId = "test_technique_1")
         assertNotNull(vm.technique.value)
-        assertEquals("Suboccipital Release", vm.technique.value?.name)
+        assertEquals("Test Technique One", vm.technique.value?.name)
     }
 
     @Test
@@ -34,25 +34,25 @@ class MassageDetailViewModelTest {
     }
 
     @Test
-    fun technique_hasCorrectStepCount_forSuboccipitalRelease() {
-        val vm = viewModel(techniqueId = "neck_suboccipital")
-        assertEquals(4, vm.technique.value?.steps?.size)
+    fun technique_hasCorrectStepCount() {
+        val vm = viewModel(techniqueId = "test_technique_1")
+        assertEquals(3, vm.technique.value?.steps?.size)
     }
 
     @Test
-    fun technique_hasCorrectAnimationType_forSuboccipitalRelease() {
-        val vm = viewModel(techniqueId = "neck_suboccipital")
+    fun technique_hasCorrectAnimationType_pressurePulse() {
+        val vm = viewModel(techniqueId = "test_technique_1")
         assertEquals(AnimationType.PRESSURE_PULSE, vm.technique.value?.animationType)
     }
 
     @Test
-    fun technique_kneadingTechnique_hasCircularAnimation() {
-        val vm = viewModel(techniqueId = "neck_trapezius_knead")
+    fun technique_secondTechnique_hasCircularAnimation() {
+        val vm = viewModel(techniqueId = "test_technique_2")
         assertEquals(AnimationType.CIRCULAR, vm.technique.value?.animationType)
     }
 
     @Test
-    fun technique_allRealTechniqueIds_resolveSuccessfully() {
+    fun technique_allDefaultTechniqueIds_resolveSuccessfully() {
         FakeMassageRepository().techniques.forEach { t ->
             val vm = viewModel(techniqueId = t.id)
             assertNotNull("Expected '${t.id}' to resolve", vm.technique.value)

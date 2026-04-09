@@ -4,11 +4,12 @@ An Android app that guides you through self-massage techniques organized by body
 
 ## Features
 
-- **Zone list** — browse massage areas: Neck, Shoulders, Arms
+- **Zone list** — browse massage areas by body zone
 - **Technique list** — per-zone catalog of massage techniques with duration info
 - **Technique detail** — step-by-step guide with animated movement illustration and body location indicator; tap the play button in the top bar to launch a guided session
-- **Routines** — curated multi-technique sequences (Morning Neck Reset, Office Tension Relief, Arms & Hands Recovery)
+- **Routines** — curated multi-technique sequences
 - **Session timer** — guided step-through player with per-step 5-second prep countdown, auto-advance, and skip/previous controls
+- **Free / Paid flavors** — two app variants with different content catalogs (see [docs/builds.md](docs/builds.md))
 
 ## Tech stack
 
@@ -26,42 +27,36 @@ An Android app that guides you through self-massage techniques organized by body
 ## Project structure
 
 ```
-app/src/main/java/ai/mlxdroid/selfmassage/
-├── data/
-│   ├── model/          # BodyZone, MassageTechnique, MassageStep,
-│   │                   # AnimationType, BodyLocation, Routine, SessionStep
-│   ├── MassageRepositoryInterface.kt
-│   └── MassageRepository.kt   # Hardcoded catalog (3 zones, 8 techniques, 3 routines)
-├── di/
-│   └── DataModule.kt   # Hilt module binding MassageRepositoryInterface
-├── domain/
-│   ├── GetZonesUseCase.kt
-│   ├── GetTechniquesForZoneUseCase.kt
-│   ├── GetTechniqueDetailUseCase.kt
-│   ├── GetRoutinesUseCase.kt
-│   ├── GetRoutineDetailUseCase.kt
-│   └── GetSessionStepsUseCase.kt  # Builds flat SessionStep list for technique or routine
-├── navigation/
-│   ├── NavRoutes.kt    # @Serializable routes: ZoneList, MassageList, MassageDetail,
-│   │                   # RoutineList, RoutineDetail, TechniqueSession, RoutineSession
-│   └── AppNavGraph.kt  # Scaffold with bottom nav (Zones / Routines tabs) + NavHost
-└── ui/
-    ├── viewmodel/
-    │   ├── ZoneListViewModel.kt
-    │   ├── MassageListViewModel.kt
-    │   ├── MassageDetailViewModel.kt
-    │   ├── RoutineListViewModel.kt
-    │   ├── RoutineDetailViewModel.kt
-    │   └── SessionViewModel.kt     # StateFlow timer with prep countdown + auto-advance
-    ├── screens/
-    │   ├── ZoneListScreen.kt
-    │   ├── MassageListScreen.kt
-    │   ├── MassageDetailScreen.kt
-    │   ├── RoutineListScreen.kt
-    │   ├── RoutineDetailScreen.kt
-    │   └── SessionScreen.kt
-    └── components/
-        └── MassageAnimationCanvas.kt   # Canvas animations + body location indicator
+app/src/
+├── main/java/ai/mlxdroid/selfmassage/   # Shared code (both flavors)
+│   ├── data/
+│   │   ├── model/          # BodyZone, MassageTechnique, MassageStep,
+│   │   │                   # AnimationType, BodyLocation, Routine, SessionStep
+│   │   └── MassageRepositoryInterface.kt
+│   ├── di/
+│   │   └── DataModule.kt   # Hilt module binding MassageRepositoryInterface
+│   ├── domain/
+│   │   ├── GetZonesUseCase.kt
+│   │   ├── GetTechniquesForZoneUseCase.kt
+│   │   ├── GetTechniqueDetailUseCase.kt
+│   │   ├── GetRoutinesUseCase.kt
+│   │   ├── GetRoutineDetailUseCase.kt
+│   │   └── GetSessionStepsUseCase.kt
+│   ├── navigation/
+│   │   ├── NavRoutes.kt
+│   │   └── AppNavGraph.kt
+│   └── ui/
+│       ├── viewmodel/      # ZoneList, MassageList, MassageDetail,
+│       │                   # RoutineList, RoutineDetail, Session ViewModels
+│       ├── screens/        # Compose screens for each route
+│       └── components/     # MassageAnimationCanvas, shared UI components
+├── free/java/.../data/
+│   └── MassageRepository.kt   # Free catalog (3 zones, 8 techniques, 3 routines)
+├── paid/java/.../data/
+│   └── MassageRepository.kt   # Paid catalog (5 zones, 14 techniques, 6 routines)
+├── test/                       # Shared unit tests
+├── testFree/                   # Free-flavor-specific tests
+└── testPaid/                   # Paid-flavor-specific tests
 ```
 
 ## Screens
@@ -114,31 +109,36 @@ The canvas also renders a continuous bezier body silhouette (neck → shoulders 
 
 ## Content
 
-### Neck (3 techniques)
-- **Suboccipital Release** — pressure hold at base of skull
-- **Lateral Neck Stretch & Friction** — downward strokes along sternocleidomastoid
-- **Upper Trapezius Kneading** — circular knead at neck-shoulder junction
+### Free (3 zones, 8 techniques, 3 routines)
 
-### Shoulders (3 techniques)
-- **Cross-Fiber Friction** — transverse strokes across the deltoid
-- **Periscapular Release** — circular friction along the shoulder blade edge
-- **Deltoid Stripping** — long gliding strokes down the outer arm
+| Zone | Techniques |
+|---|---|
+| Neck | Suboccipital Release, Lateral Neck Stretch & Friction, Upper Trapezius Kneading |
+| Shoulders | Cross-Fiber Friction, Periscapular Release, Deltoid Stripping |
+| Arms | Forearm Muscle Rolling, Hand Web & Thumb Base Massage |
 
-### Arms (2 techniques)
-- **Forearm Muscle Rolling** — transverse sweeps along wrist extensors and flexors
-- **Hand Web & Thumb Base Massage** — thenar eminence circles + LI4 acupressure hold
+Routines: Morning Neck Reset (7 min), Office Tension Relief (11 min), Arms & Hands Recovery (7 min)
 
-### Routines (3 sequences)
-- **Morning Neck Reset** (~6 min) — Suboccipital Release → Upper Trapezius Kneading
-- **Office Tension Relief** (~11 min) — Lateral Neck Stretch → Cross-Fiber Friction → Periscapular Release
-- **Arms & Hands Recovery** (~7 min) — Forearm Rolling → Hand Web Massage
+### Paid (5 zones, 14 techniques, 6 routines)
+
+Everything in Free, plus:
+
+| Zone | Techniques |
+|---|---|
+| Lower Back | Lumbar Pressure Points, QL Side Release, Sacral Circles |
+| Legs | IT Band Foam Roll, Calf Kneading, Plantar Fascia Release |
+
+Additional routines: Lower Back Relief (10 min), Runner's Recovery (11 min), Full Body Reset (17 min)
 
 ## Getting started
 
 1. Clone the repo
 2. Open in Android Studio Meerkat or later
 3. Sync Gradle (`File → Sync Project with Gradle Files`)
-4. Run on a device or emulator running Android 9+
+4. Select a build variant: `freeDebug` or `paidDebug` (`Build → Select Build Variant`)
+5. Run on a device or emulator running Android 9+
+
+For detailed build commands, signing, and CI setup, see [docs/builds.md](docs/builds.md).
 
 ## Compose Previews
 

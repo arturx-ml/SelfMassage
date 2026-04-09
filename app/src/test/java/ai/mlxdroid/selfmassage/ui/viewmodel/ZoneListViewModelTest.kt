@@ -15,13 +15,13 @@ class ZoneListViewModelTest {
     @Test
     fun zones_exposesAllZonesFromRepo() {
         val vm = viewModel()
-        assertEquals(3, vm.zones.value.size)
+        assertEquals(2, vm.zones.value.size)
     }
 
     @Test
     fun zones_firstItemMatchesFirstRepoZone() {
         val vm = viewModel()
-        assertEquals("neck", vm.zones.value.first().id)
+        assertEquals("test_zone_1", vm.zones.value.first().id)
     }
 
     @Test

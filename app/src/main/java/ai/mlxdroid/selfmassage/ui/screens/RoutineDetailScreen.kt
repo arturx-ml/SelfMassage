@@ -32,7 +32,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ai.mlxdroid.selfmassage.data.MassageRepository
+import ai.mlxdroid.selfmassage.data.model.AnimationType
+import ai.mlxdroid.selfmassage.data.model.BodyLocation
+import ai.mlxdroid.selfmassage.data.model.MassageStep
 import ai.mlxdroid.selfmassage.data.model.MassageTechnique
 import ai.mlxdroid.selfmassage.data.model.Routine
 import ai.mlxdroid.selfmassage.ui.components.AccentChip
@@ -186,12 +188,15 @@ fun RoutineDetailContent(
 @Preview(showBackground = true)
 @Composable
 private fun RoutineDetailContentPreview() {
-    val routine = MassageRepository.routines.first()
-    val techniques = routine.techniqueIds.mapNotNull { MassageRepository.techniqueById(it) }
+    val sampleTechniques = listOf(
+        MassageTechnique("t1", "Suboccipital Release", "Releases tension at the base of the skull", 3, listOf(MassageStep(1, "Step", 60)), AnimationType.PRESSURE_PULSE, BodyLocation.BASE_OF_SKULL),
+        MassageTechnique("t2", "Upper Trapezius Kneading", "Classic knead for the neck-shoulder junction", 4, listOf(MassageStep(1, "Step", 60)), AnimationType.CIRCULAR, BodyLocation.UPPER_TRAPEZIUS)
+    )
+    val sampleRoutine = Routine("r1", "Morning Neck Reset", "Eases overnight stiffness.", "SelfImprovement", 7, listOf("t1", "t2"))
     SelfMassageTheme {
         RoutineDetailContent(
-            routine = routine,
-            techniques = techniques,
+            routine = sampleRoutine,
+            techniques = sampleTechniques,
             onBack = {},
             onStartRoutine = {}
         )
